@@ -12,16 +12,24 @@ import {
   Search, 
   Filter, 
   Download, 
-  Calendar,
+  Calendar as CalendarIcon,
   User as UserIcon,
   Monitor,
   Activity,
   AlertTriangle,
   Lock,
-  Info
+  Info,
+  XCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { format } from "date-fns"
 
 interface AuditLog {
   id: string;
@@ -49,6 +57,7 @@ export default function AuditLogsPage() {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [logs, setLogs] = useState<AuditLog[]>(MOCK_LOGS);
 
   useEffect(() => {
@@ -67,12 +76,16 @@ export default function AuditLogsPage() {
     );
   }
 
-  const filteredLogs = logs.filter(log => 
-    log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.module.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.ipAddress.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredLogs = logs.filter(log => {
+    const matchesSearch = log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.module.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.ipAddress.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesDate = !selectedDate || log.timestamp.includes(format(selectedDate, "yyyy-MM-dd"));
+    
+    return matchesSearch && matchesDate;
+  });
 
   const handleExport = () => {
     toast({
@@ -95,7 +108,7 @@ export default function AuditLogsPage() {
 
       toast({
         title: "Export Complete",
-        description: "Audit logs have been exported successfully.",
+        description: `${filteredLogs.length} security events have been exported successfully.`,
       });
     }, 1500);
   };
@@ -110,10 +123,36 @@ export default function AuditLogsPage() {
           <p className="text-muted-foreground">Monitor and investigate all administrative actions across the platform.</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="gap-2">
-            <Calendar className="w-4 h-4" /> Filter Date
-          </Button>
-          <Button variant="default" className="gap-2" onClick={handleExport}>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className={cn("gap-2", selectedDate && "border-primary text-primary")}>
+                <CalendarIcon className="w-4 h-4" /> 
+                {selectedDate ? format(selectedDate, "PPP") : "Filter Date"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+
+          {selectedDate && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setSelectedDate(undefined)}
+              className="text-muted-foreground hover:text-destructive"
+              title="Clear Date Filter"
+            >
+              <XCircle className="w-4 h-4" />
+            </Button>
+          )}
+
+          <Button variant="default" className="gap-2" onClick={handleExport} disabled={filteredLogs.length === 0}>
             <Download className="w-4 h-4" /> Export CSV
           </Button>
         </div>
@@ -251,6 +290,18 @@ export default function AuditLogsPage() {
                     <div className="flex flex-col items-center gap-2">
                       <Info className="w-8 h-8 opacity-20" />
                       <p>No security events matching your criteria were found.</p>
+                      {(searchTerm || selectedDate) && (
+                        <Button 
+                          variant="link" 
+                          size="sm" 
+                          onClick={() => {
+                            setSearchTerm('');
+                            setSelectedDate(undefined);
+                          }}
+                        >
+                          Clear all filters
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
