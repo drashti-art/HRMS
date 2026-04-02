@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -16,7 +15,8 @@ import {
   LogOut,
   ShieldAlert,
   BarChart3,
-  UserCircle
+  UserCircle,
+  History
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { clearSession } from '@/lib/auth';
@@ -38,6 +38,7 @@ const navItems: NavItem[] = [
   { title: 'Employees', href: '/dashboard/employees', icon: Users, roles: ['SuperAdmin', 'Admin', 'HR'] },
   { title: 'My Team', href: '/dashboard/team', icon: Users, roles: ['Manager'] },
   { title: 'Attendance', href: '/dashboard/attendance', icon: CalendarCheck, roles: ['SuperAdmin', 'Admin', 'HR', 'Manager', 'Employee'] },
+  { title: 'Activities', href: '/dashboard/activities', icon: History, roles: ['SuperAdmin', 'Admin', 'HR', 'Manager', 'Employee'] },
   { title: 'Leaves', href: '/dashboard/leaves', icon: FileText, roles: ['SuperAdmin', 'Admin', 'HR', 'Manager', 'Employee'] },
   { title: 'Recruitment', href: '/dashboard/recruitment', icon: Search, roles: ['SuperAdmin', 'HR'] },
   { title: 'Payroll', href: '/dashboard/payroll', icon: CreditCard, roles: ['SuperAdmin', 'Admin', 'HR', 'Employee'] },

@@ -27,22 +27,10 @@ export default function DashboardOverview() {
   const isManager = user.role === 'Manager';
 
   const handleViewAllActivity = () => {
-    if (user.role === 'SuperAdmin') {
-      router.push('/dashboard/logs');
-    } else if (user.role === 'HR') {
-      router.push('/dashboard/recruitment');
-    } else if (user.role === 'Manager') {
-      router.push('/dashboard/team');
-    } else {
-      toast({
-        title: "Activity History",
-        description: "A detailed activity history feature for your role is coming soon.",
-      });
-    }
+    router.push('/dashboard/activities');
   };
 
   const handleReviewAllApprovals = () => {
-    // For most roles, approvals are centered in the Leaves section
     router.push('/dashboard/leaves');
   };
 
