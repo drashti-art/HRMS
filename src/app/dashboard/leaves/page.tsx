@@ -115,6 +115,7 @@ export default function LeavesPage() {
   };
 
   const isAdminOrSuperAdmin = user?.role === 'SuperAdmin' || user?.role === 'Admin';
+  const canActionLeaves = user?.role !== 'Employee';
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -273,7 +274,7 @@ export default function LeavesPage() {
                   <TableHead className="font-bold">Duration</TableHead>
                   <TableHead className="font-bold">Days</TableHead>
                   <TableHead className="font-bold">Status</TableHead>
-                  <TableHead className="text-right font-bold">Actions</TableHead>
+                  {canActionLeaves && <TableHead className="text-right font-bold">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -311,37 +312,39 @@ export default function LeavesPage() {
                           {leave.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right">
-                        {leave.status === 'Pending' ? (
-                          <div className="flex justify-end gap-2">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
-                              onClick={() => handleAction(leave.id, 'Approved')}
-                            >
-                              <CheckCircle2 className="w-4 h-4" />
+                      {canActionLeaves && (
+                        <TableCell className="text-right">
+                          {leave.status === 'Pending' ? (
+                            <div className="flex justify-end gap-2">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                                onClick={() => handleAction(leave.id, 'Approved')}
+                              >
+                                <CheckCircle2 className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                                onClick={() => handleAction(leave.id, 'Rejected')}
+                              >
+                                <XCircle className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button variant="ghost" size="sm" disabled>
+                              Finalized
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
-                              onClick={() => handleAction(leave.id, 'Rejected')}
-                            >
-                              <XCircle className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <Button variant="ghost" size="sm" disabled>
-                            Finalized
-                          </Button>
-                        )}
-                      </TableCell>
+                          )}
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={canActionLeaves ? 6 : 5} className="h-32 text-center text-muted-foreground">
                       No leave requests found.
                     </TableCell>
                   </TableRow>
