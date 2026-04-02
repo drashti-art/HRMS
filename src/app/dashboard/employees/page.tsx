@@ -12,9 +12,10 @@ import {
   MoreHorizontal, 
   Filter, 
   Download,
-  XCircle
+  XCircle,
+  Loader2
 } from 'lucide-react';
-import { MOCK_USERS, Role } from '@/lib/auth';
+import { MOCK_USERS, Role, User } from '@/lib/auth';
 import {
   Select,
   SelectContent,
@@ -22,16 +23,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { useToast } from '@/hooks/use-toast';
 
 export default function EmployeesPage() {
+  const { toast } = useToast();
+  const [employees, setEmployees] = useState<User[]>(MOCK_USERS);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
   const [selectedRole, setSelectedRole] = useState<string>('all');
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [newEmployee, setNewEmployee] = useState({
+    name: '',
+    email: '',
+    designation: '',
+    department: 'Engineering',
+    role: 'Employee' as Role
+  });
 
-  const departments = Array.from(new Set(MOCK_USERS.map(u => u.department)));
+  const departments = Array.from(new Set(employees.map(u => u.department)));
   const roles: Role[] = ['SuperAdmin', 'Admin', 'HR', 'Manager', 'Employee'];
 
-  const filteredEmployees = MOCK_USERS.filter(user => {
+  const filteredEmployees = employees.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.department.toLowerCase().includes(searchTerm.toLowerCase());
@@ -50,6 +72,47 @@ export default function EmployeesPage() {
 
   const hasActiveFilters = searchTerm !== '' || selectedDepartment !== 'all' || selectedRole !== 'all';
 
+  const handleExport = () => {
+    toast({
+      title: "Exporting Data",
+      description: "Preparing employee records for download... (CSV)",
+    });
+    
+    // Simulate a download delay
+    setTimeout(() => {
+      toast({
+        title: "Export Complete",
+        description: `${filteredEmployees.length} records exported successfully.`,
+      });
+    }, 1500);
+  };
+
+  const handleAddEmployee = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEmployee.name || !newEmployee.email) return;
+
+    const employee: User = {
+      id: Math.random().toString(36).substr(2, 9),
+      ...newEmployee,
+      joiningDate: new Date().toISOString().split('T')[0]
+    };
+
+    setEmployees([employee, ...employees]);
+    setIsAddDialogOpen(false);
+    setNewEmployee({
+      name: '',
+      email: '',
+      designation: '',
+      department: 'Engineering',
+      role: 'Employee'
+    });
+
+    toast({
+      title: "Employee Added",
+      description: `${newEmployee.name} has been added to the organization.`,
+    });
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex justify-between items-center">
@@ -58,12 +121,97 @@ export default function EmployeesPage() {
           <p className="text-muted-foreground">View and manage all organization personnel records.</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2" onClick={handleExport}>
             <Download className="w-4 h-4" /> Export
           </Button>
-          <Button className="gap-2 shadow-sm">
-            <Plus className="w-4 h-4" /> Add Employee
-          </Button>
+          
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2 shadow-sm">
+                <Plus className="w-4 h-4" /> Add Employee
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Add New Employee</DialogTitle>
+                <DialogDescription>
+                  Enter the details of the new organizational member here.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleAddEmployee} className="space-y-4 pt-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input 
+                    id="name" 
+                    placeholder="John Doe" 
+                    value={newEmployee.name}
+                    onChange={(e) => setNewEmployee({...newEmployee, name: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="john@worknest.com" 
+                    value={newEmployee.email}
+                    onChange={(e) => setNewEmployee({...newEmployee, email: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="dept">Department</Label>
+                    <Select 
+                      value={newEmployee.department} 
+                      onValueChange={(v) => setNewEmployee({...newEmployee, department: v})}
+                    >
+                      <SelectTrigger id="dept">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Engineering">Engineering</SelectItem>
+                        <SelectItem value="Design">Design</SelectItem>
+                        <SelectItem value="Marketing">Marketing</SelectItem>
+                        <SelectItem value="Human Resources">Human Resources</SelectItem>
+                        <SelectItem value="Sales">Sales</SelectItem>
+                        <SelectItem value="Executive">Executive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="role">Role</Label>
+                    <Select 
+                      value={newEmployee.role} 
+                      onValueChange={(v: Role) => setNewEmployee({...newEmployee, role: v})}
+                    >
+                      <SelectTrigger id="role">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {roles.map(r => (
+                          <SelectItem key={r} value={r}>{r}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="designation">Designation</Label>
+                  <Input 
+                    id="designation" 
+                    placeholder="Senior Developer" 
+                    value={newEmployee.designation}
+                    onChange={(e) => setNewEmployee({...newEmployee, designation: e.target.value})}
+                  />
+                </div>
+                <DialogFooter className="pt-4">
+                  <Button type="submit">Add Employee</Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
