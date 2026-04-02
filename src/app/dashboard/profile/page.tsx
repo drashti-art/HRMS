@@ -47,8 +47,6 @@ export default function ProfilePage() {
 
   const handleUpdateProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you would call an API here.
-    // For now, we update local state to simulate a successful save.
     if (user) {
       const updatedUser = { ...user, ...formData };
       setUser(updatedUser);
@@ -194,28 +192,33 @@ export default function ProfilePage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="dashboard-card border-l-4 border-l-emerald-400">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <Briefcase className="w-8 h-8 text-emerald-500" />
-              <div>
-                <h4 className="font-bold text-sm">Employment Status</h4>
-                <p className="text-xs text-muted-foreground">Full-time Permanent</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="dashboard-card border-l-4 border-l-accent">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <UserCircle className="w-8 h-8 text-accent" />
-              <div>
-                <h4 className="font-bold text-sm">Profile Verified</h4>
-                <p className="text-xs text-muted-foreground">Your HR record is up to date.</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        
+        {!isAdmin && (
+          <>
+            <Card className="dashboard-card border-l-4 border-l-emerald-400">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <Briefcase className="w-8 h-8 text-emerald-500" />
+                  <div>
+                    <h4 className="font-bold text-sm">Employment Status</h4>
+                    <p className="text-xs text-muted-foreground">Full-time Permanent</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="dashboard-card border-l-4 border-l-accent">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <UserCircle className="w-8 h-8 text-accent" />
+                  <div>
+                    <h4 className="font-bold text-sm">Profile Verified</h4>
+                    <p className="text-xs text-muted-foreground">Your HR record is up to date.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
     </div>
   );
