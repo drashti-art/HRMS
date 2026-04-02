@@ -1,17 +1,20 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
 import { getSession, User } from '@/lib/auth';
 import { StatsCard } from '@/components/dashboard/StatsCard';
-import { Users, CalendarClock, Briefcase, DollarSign, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Users, CalendarClock, Briefcase, DollarSign, CheckCircle2, AlertCircle, FileText } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 export default function DashboardOverview() {
   const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     setUser(getSession());
@@ -22,6 +25,26 @@ export default function DashboardOverview() {
   const isAdmin = user.role === 'SuperAdmin' || user.role === 'Admin';
   const isHR = user.role === 'HR';
   const isManager = user.role === 'Manager';
+
+  const handleViewAllActivity = () => {
+    if (user.role === 'SuperAdmin') {
+      router.push('/dashboard/logs');
+    } else if (user.role === 'HR') {
+      router.push('/dashboard/recruitment');
+    } else if (user.role === 'Manager') {
+      router.push('/dashboard/team');
+    } else {
+      toast({
+        title: "Activity History",
+        description: "A detailed activity history feature for your role is coming soon.",
+      });
+    }
+  };
+
+  const handleReviewAllApprovals = () => {
+    // For most roles, approvals are centered in the Leaves section
+    router.push('/dashboard/leaves');
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -69,7 +92,7 @@ export default function DashboardOverview() {
         <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Recent Activity</CardTitle>
-            <Button variant="outline" size="sm">View All</Button>
+            <Button variant="outline" size="sm" onClick={handleViewAllActivity}>View All</Button>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
@@ -96,7 +119,7 @@ export default function DashboardOverview() {
         <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Pending Approvals</CardTitle>
-            <Button variant="outline" size="sm">Review All</Button>
+            <Button variant="outline" size="sm" onClick={handleReviewAllApprovals}>Review All</Button>
           </CardHeader>
           <CardContent>
             <Table>
@@ -121,7 +144,14 @@ export default function DashboardOverview() {
                       <Badge variant={row.status === "Pending" ? "default" : "secondary"}>{row.status}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" className="text-accent">Review</Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-accent"
+                        onClick={() => router.push('/dashboard/leaves')}
+                      >
+                        Review
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -133,5 +163,3 @@ export default function DashboardOverview() {
     </div>
   );
 }
-
-import { FileText } from 'lucide-react';
