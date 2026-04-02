@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -61,7 +62,20 @@ export default function EmployeesPage() {
     role: 'Employee' as Role
   });
 
-  const departments = Array.from(new Set(employees.map(u => u.department)));
+  const allDepartments = [
+    'Engineering', 
+    'Design', 
+    'Marketing', 
+    'Human Resources', 
+    'Sales', 
+    'Executive', 
+    'Finance', 
+    'Legal', 
+    'Operations', 
+    'Customer Support',
+    'IT'
+  ].sort();
+
   const roles: Role[] = ['SuperAdmin', 'Admin', 'HR', 'Manager', 'Employee'];
 
   const filteredEmployees = employees.filter(user => {
@@ -89,7 +103,6 @@ export default function EmployeesPage() {
       description: "Preparing employee records for download... (CSV)",
     });
     
-    // Simulate a download delay
     setTimeout(() => {
       toast({
         title: "Export Complete",
@@ -191,12 +204,9 @@ export default function EmployeesPage() {
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Engineering">Engineering</SelectItem>
-                        <SelectItem value="Design">Design</SelectItem>
-                        <SelectItem value="Marketing">Marketing</SelectItem>
-                        <SelectItem value="Human Resources">Human Resources</SelectItem>
-                        <SelectItem value="Sales">Sales</SelectItem>
-                        <SelectItem value="Executive">Executive</SelectItem>
+                        {allDepartments.map(dept => (
+                          <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -256,7 +266,7 @@ export default function EmployeesPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Departments</SelectItem>
-                    {departments.map(dept => (
+                    {allDepartments.map(dept => (
                       <SelectItem key={dept} value={dept}>{dept}</SelectItem>
                     ))}
                   </SelectContent>
