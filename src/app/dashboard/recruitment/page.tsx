@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { 
   Search, 
   Upload, 
@@ -20,7 +21,10 @@ import {
   Loader2,
   Plus,
   ArrowRight,
-  ClipboardCheck
+  ClipboardCheck,
+  ChevronLeft,
+  User,
+  MoreVertical
 } from 'lucide-react';
 import { summarizeResume, ResumeSummarizerOutput } from '@/ai/flows/ai-resume-summarizer';
 import { aiJobDescriptionGenerator } from '@/ai/flows/ai-job-description-generator';
@@ -34,6 +38,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { cn } from '@/lib/utils';
 
 interface JobListing {
   id: string;
@@ -45,11 +50,35 @@ interface JobListing {
   description?: string;
 }
 
+interface Applicant {
+  id: string;
+  name: string;
+  email: string;
+  status: 'Screening' | 'Interviewing' | 'Applied' | 'Rejected' | 'Hired';
+  score: number;
+  appliedDate: string;
+}
+
 const INITIAL_LISTINGS: JobListing[] = [
   { id: '1', title: "Senior Product Designer", dept: "Design", applicants: 45, status: "Active", date: "2 days ago" },
   { id: '2', title: "Frontend Developer (React)", dept: "Engineering", applicants: 120, status: "Urgent", date: "5 days ago" },
   { id: '3', title: "HR Generalist", dept: "HR", applicants: 12, status: "Active", date: "1 week ago" },
 ];
+
+const MOCK_APPLICANTS: Record<string, Applicant[]> = {
+  '1': [
+    { id: 'a1', name: 'Alice Wonder', email: 'alice@example.com', status: 'Interviewing', score: 92, appliedDate: '2024-03-12' },
+    { id: 'a2', name: 'Bob Builder', email: 'bob@example.com', status: 'Screening', score: 85, appliedDate: '2024-03-13' },
+    { id: 'a3', name: 'Charlie Day', email: 'charlie@itshere.com', status: 'Applied', score: 78, appliedDate: '2024-03-14' },
+  ],
+  '2': [
+    { id: 'a4', name: 'Diana Prince', email: 'diana@themyscira.com', status: 'Interviewing', score: 98, appliedDate: '2024-03-10' },
+    { id: 'a5', name: 'Edward Norton', email: 'ed@fightclub.com', status: 'Rejected', score: 45, appliedDate: '2024-03-11' },
+  ],
+  '3': [
+    { id: 'a6', name: 'Fiona Apple', email: 'fiona@music.com', status: 'Screening', score: 88, appliedDate: '2024-03-08' },
+  ],
+};
 
 export default function RecruitmentPage() {
   const { toast } = useToast();
@@ -65,6 +94,8 @@ export default function RecruitmentPage() {
   const [jobListings, setJobListings] = useState<JobListing[]>(INITIAL_LISTINGS);
   const [isAddJobOpen, setIsAddJobOpen] = useState(false);
   const [newJob, setNewJob] = useState({ title: '', dept: '', status: 'Active' as JobListing['status'] });
+
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
   const handleSummarize = async () => {
     if (!resumeText) return;
@@ -136,6 +167,9 @@ export default function RecruitmentPage() {
     toast({ title: "Saved to Listings", description: "The generated JD has been added as a new job opening." });
     setActiveTab('listings');
   };
+
+  const selectedJob = jobListings.find(j => j.id === selectedJobId);
+  const applicantsForSelectedJob = selectedJobId ? (MOCK_APPLICANTS[selectedJobId] || []) : [];
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -310,7 +344,7 @@ export default function RecruitmentPage() {
               <div className="space-y-2">
                 <Label>Key Responsibilities (Briefly)</Label>
                 <textarea 
-                  className="w-full p-3 border rounded-md min-h-[100px]"
+                  className="w-full p-3 border rounded-md min-h-[100px] bg-background text-sm"
                   placeholder="Bullet points of main duties..."
                   value={jdInput.responsibilities}
                   onChange={(e) => setJdInput({...jdInput, responsibilities: e.target.value})}
@@ -343,40 +377,146 @@ export default function RecruitmentPage() {
         </TabsContent>
 
         <TabsContent value="listings">
-          <Card className="dashboard-card">
-            <CardHeader>
-              <CardTitle>Active Job Openings</CardTitle>
-              <CardDescription>Currently advertised roles across the organization.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {jobListings.map((job) => (
-                  <div key={job.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-secondary/20 transition-colors">
-                    <div className="flex gap-4 items-center">
-                      <div className="bg-primary/10 p-2 rounded-lg">
-                        <Briefcase className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-bold">{job.title}</p>
-                        <p className="text-xs text-muted-foreground">{job.dept} • Posted {job.date}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-6">
-                      <div className="text-right">
-                        <p className="text-sm font-semibold">{job.applicants} Applicants</p>
-                        <Badge variant={job.status === "Urgent" ? "destructive" : "default"} className="text-[10px] h-4">
-                          {job.status}
-                        </Badge>
-                      </div>
-                      <Button variant="ghost" size="icon">
-                        <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+          {selectedJobId ? (
+            <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+              <Button 
+                variant="ghost" 
+                className="gap-2 text-muted-foreground hover:text-primary pl-0"
+                onClick={() => setSelectedJobId(null)}
+              >
+                <ChevronLeft className="w-4 h-4" /> Back to Listings
+              </Button>
+              
+              <div className="flex justify-between items-end">
+                <div>
+                  <h2 className="text-2xl font-bold text-primary">{selectedJob?.title}</h2>
+                  <p className="text-muted-foreground">{selectedJob?.dept} • {selectedJob?.applicants} Total Applicants</p>
+                </div>
+                <Badge variant={selectedJob?.status === 'Urgent' ? 'destructive' : 'default'}>
+                  {selectedJob?.status}
+                </Badge>
               </div>
-            </CardContent>
-          </Card>
+
+              <Card className="dashboard-card overflow-hidden">
+                <CardHeader className="bg-secondary/10 border-b">
+                  <CardTitle>Applicant Listing</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader className="bg-secondary/5">
+                      <TableRow>
+                        <TableHead>Candidate</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Match Score</TableHead>
+                        <TableHead>Applied Date</TableHead>
+                        <TableHead className="text-right">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {applicantsForSelectedJob.length > 0 ? (
+                        applicantsForSelectedJob.map((applicant) => (
+                          <TableRow key={applicant.id} className="hover:bg-accent/5">
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+                                  {applicant.name.charAt(0)}
+                                </div>
+                                <div>
+                                  <p className="font-semibold">{applicant.name}</p>
+                                  <p className="text-xs text-muted-foreground">{applicant.email}</p>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant="outline"
+                                className={cn(
+                                  "text-[10px]",
+                                  applicant.status === 'Interviewing' && "bg-blue-50 text-blue-700 border-blue-200",
+                                  applicant.status === 'Hired' && "bg-emerald-50 text-emerald-700 border-emerald-200",
+                                  applicant.status === 'Rejected' && "bg-rose-50 text-rose-700 border-rose-200",
+                                  applicant.status === 'Screening' && "bg-amber-50 text-amber-700 border-amber-200"
+                                )}
+                              >
+                                {applicant.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <div className="w-16 bg-secondary rounded-full h-1.5 overflow-hidden">
+                                  <div 
+                                    className={cn(
+                                      "h-full rounded-full",
+                                      applicant.score > 80 ? "bg-emerald-500" : "bg-amber-500"
+                                    )} 
+                                    style={{ width: `${applicant.score}%` }}
+                                  />
+                                </div>
+                                <span className="text-xs font-bold">{applicant.score}%</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground">
+                              {applicant.appliedDate}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="ghost" size="sm" className="text-xs h-8 text-primary">
+                                View Resume
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                            No applicants found for this position.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <Card className="dashboard-card">
+              <CardHeader>
+                <CardTitle>Active Job Openings</CardTitle>
+                <CardDescription>Currently advertised roles across the organization. Click a role to view applicants.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {jobListings.map((job) => (
+                    <div 
+                      key={job.id} 
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-secondary/30 transition-all cursor-pointer group"
+                      onClick={() => setSelectedJobId(job.id)}
+                    >
+                      <div className="flex gap-4 items-center">
+                        <div className="bg-primary/10 p-2 rounded-lg group-hover:bg-primary group-hover:text-white transition-colors">
+                          <Briefcase className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-bold">{job.title}</p>
+                          <p className="text-xs text-muted-foreground">{job.dept} • Posted {job.date}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <div className="text-right">
+                          <p className="text-sm font-semibold">{job.applicants} Applicants</p>
+                          <Badge variant={job.status === "Urgent" ? "destructive" : "default"} className="text-[10px] h-4">
+                            {job.status}
+                          </Badge>
+                        </div>
+                        <Button variant="ghost" size="icon" className="group-hover:translate-x-1 transition-transform">
+                          <ArrowRight className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
     </div>
