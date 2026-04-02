@@ -1,0 +1,23 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hr-hero",
+      "description": "Modern office environment with employees working together",
+      "imageUrl": "https://picsum.photos/seed/worknest1/1200/600",
+      "imageHint": "office workspace"
+    },
+    {
+      "id": "recruitment-banner",
+      "description": "HR professional interviewing a candidate",
+      "imageUrl": "https://picsum.photos/seed/worknest2/800/400",
+      "imageHint": "job interview"
+    },
+    {
+      "id": "user-avatar-1",
+      "description": "Employee profile picture",
+      "imageUrl": "https://picsum.photos/seed/user1/200/200",
+      "imageHint": "person portrait"
+    }
+  ]
+}
