@@ -17,11 +17,39 @@ import {
   CheckCircle2, 
   Clock, 
   Briefcase,
-  Loader2
+  Loader2,
+  Plus,
+  ArrowRight,
+  ClipboardCheck
 } from 'lucide-react';
 import { summarizeResume, ResumeSummarizerOutput } from '@/ai/flows/ai-resume-summarizer';
 import { aiJobDescriptionGenerator } from '@/ai/flows/ai-job-description-generator';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+interface JobListing {
+  id: string;
+  title: string;
+  dept: string;
+  applicants: number;
+  status: 'Active' | 'Urgent' | 'Closed';
+  date: string;
+  description?: string;
+}
+
+const INITIAL_LISTINGS: JobListing[] = [
+  { id: '1', title: "Senior Product Designer", dept: "Design", applicants: 45, status: "Active", date: "2 days ago" },
+  { id: '2', title: "Frontend Developer (React)", dept: "Engineering", applicants: 120, status: "Urgent", date: "5 days ago" },
+  { id: '3', title: "HR Generalist", dept: "HR", applicants: 12, status: "Active", date: "1 week ago" },
+];
 
 export default function RecruitmentPage() {
   const { toast } = useToast();
@@ -34,11 +62,14 @@ export default function RecruitmentPage() {
   const [jdResult, setJdResult] = useState<string | null>(null);
   const [jdInput, setJdInput] = useState({ title: '', dept: '', responsibilities: '' });
 
+  const [jobListings, setJobListings] = useState<JobListing[]>(INITIAL_LISTINGS);
+  const [isAddJobOpen, setIsAddJobOpen] = useState(false);
+  const [newJob, setNewJob] = useState({ title: '', dept: '', status: 'Active' as JobListing['status'] });
+
   const handleSummarize = async () => {
     if (!resumeText) return;
     setLoadingSummary(true);
     try {
-      // Mock data URI as the tool expects one
       const mockDataUri = `data:text/plain;base64,${btoa(resumeText)}`;
       const result = await summarizeResume({ resumeContent: mockDataUri });
       setSummaryResult(result);
@@ -69,6 +100,43 @@ export default function RecruitmentPage() {
     }
   };
 
+  const handleAddJobListing = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newJob.title || !newJob.dept) return;
+
+    const listing: JobListing = {
+      id: Math.random().toString(36).substr(2, 9),
+      title: newJob.title,
+      dept: newJob.dept,
+      applicants: 0,
+      status: newJob.status,
+      date: "Just now"
+    };
+
+    setJobListings([listing, ...jobListings]);
+    setIsAddJobOpen(false);
+    setNewJob({ title: '', dept: '', status: 'Active' });
+    toast({ title: "Job Posted", description: `${newJob.title} is now live.` });
+  };
+
+  const handleSaveJdToListing = () => {
+    if (!jdResult || !jdInput.title || !jdInput.dept) return;
+
+    const listing: JobListing = {
+      id: Math.random().toString(36).substr(2, 9),
+      title: jdInput.title,
+      dept: jdInput.dept,
+      applicants: 0,
+      status: 'Active',
+      date: "Just now",
+      description: jdResult
+    };
+
+    setJobListings([listing, ...jobListings]);
+    toast({ title: "Saved to Listings", description: "The generated JD has been added as a new job opening." });
+    setActiveTab('listings');
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex justify-between items-center">
@@ -76,9 +144,43 @@ export default function RecruitmentPage() {
           <h1 className="text-3xl font-bold text-primary">Recruitment Management</h1>
           <p className="text-muted-foreground">Manage job postings and screen candidates with AI assistance.</p>
         </div>
-        <Button className="gap-2">
-          <Briefcase className="w-4 h-4" /> New Job Posting
-        </Button>
+        
+        <Dialog open={isAddJobOpen} onOpenChange={setIsAddJobOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="w-4 h-4" /> New Job Posting
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Job Posting</DialogTitle>
+              <DialogDescription>Enter the basic details for the new role.</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleAddJobListing} className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Job Title</Label>
+                <Input 
+                  placeholder="e.g. Senior Software Engineer" 
+                  value={newJob.title}
+                  onChange={(e) => setNewJob({...newJob, title: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Department</Label>
+                <Input 
+                  placeholder="e.g. Engineering" 
+                  value={newJob.dept}
+                  onChange={(e) => setNewJob({...newJob, dept: e.target.value})}
+                  required
+                />
+              </div>
+              <DialogFooter className="pt-4">
+                <Button type="submit">Post Job</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -223,10 +325,15 @@ export default function RecruitmentPage() {
                 <div className="mt-8 p-6 bg-secondary/10 rounded-xl border whitespace-pre-wrap text-sm leading-relaxed">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold text-lg text-primary">Generated Job Description</h3>
-                    <Button variant="outline" size="sm" onClick={() => {
-                      navigator.clipboard.writeText(jdResult);
-                      toast({ title: "Copied to clipboard" });
-                    }}>Copy Text</Button>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={() => {
+                        navigator.clipboard.writeText(jdResult);
+                        toast({ title: "Copied to clipboard" });
+                      }}>Copy Text</Button>
+                      <Button variant="default" size="sm" className="gap-2" onClick={handleSaveJdToListing}>
+                        <Plus className="w-3 h-3" /> Save to Listings
+                      </Button>
+                    </div>
                   </div>
                   {jdResult}
                 </div>
@@ -239,15 +346,12 @@ export default function RecruitmentPage() {
           <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Active Job Openings</CardTitle>
+              <CardDescription>Currently advertised roles across the organization.</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {[
-                  { title: "Senior Product Designer", dept: "Design", applicants: 45, status: "Active", date: "2 days ago" },
-                  { title: "Frontend Developer (React)", dept: "Engineering", applicants: 120, status: "Urgent", date: "5 days ago" },
-                  { title: "HR Generalist", dept: "HR", applicants: 12, status: "Active", date: "1 week ago" },
-                ].map((job, i) => (
-                  <div key={i} className="flex items-center justify-between p-4 border rounded-lg hover:bg-secondary/20 transition-colors">
+                {jobListings.map((job) => (
+                  <div key={job.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-secondary/20 transition-colors">
                     <div className="flex gap-4 items-center">
                       <div className="bg-primary/10 p-2 rounded-lg">
                         <Briefcase className="w-5 h-5 text-primary" />
@@ -265,7 +369,7 @@ export default function RecruitmentPage() {
                         </Badge>
                       </div>
                       <Button variant="ghost" size="icon">
-                        <Clock className="w-4 h-4" />
+                        <ArrowRight className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>

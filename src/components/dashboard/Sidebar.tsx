@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -40,7 +41,7 @@ const navItems: NavItem[] = [
   { title: 'Attendance', href: '/dashboard/attendance', icon: CalendarCheck, roles: ['SuperAdmin', 'Admin', 'HR', 'Manager', 'Employee'] },
   { title: 'Activities', href: '/dashboard/activities', icon: History, roles: ['SuperAdmin', 'Admin', 'HR', 'Manager', 'Employee'] },
   { title: 'Leaves', href: '/dashboard/leaves', icon: FileText, roles: ['SuperAdmin', 'Admin', 'HR', 'Manager', 'Employee'] },
-  { title: 'Recruitment', href: '/dashboard/recruitment', icon: Search, roles: ['SuperAdmin', 'HR'] },
+  { title: 'Recruitment', href: '/dashboard/recruitment', icon: Search, roles: ['SuperAdmin', 'Admin', 'HR', 'Manager'] },
   { title: 'Payroll', href: '/dashboard/payroll', icon: CreditCard, roles: ['SuperAdmin', 'Admin', 'HR', 'Employee'] },
   { title: 'Performance', href: '/dashboard/performance', icon: BarChart3, roles: ['Manager', 'Employee'] },
   { title: 'Profile', href: '/dashboard/profile', icon: UserCircle, roles: ['Employee', 'Manager', 'HR', 'Admin', 'SuperAdmin'] },
