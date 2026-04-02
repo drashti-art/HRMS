@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getSession, User } from '@/lib/auth';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,14 +22,38 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    department: '',
+    designation: '',
+    bio: ''
+  });
   const { toast } = useToast();
 
   useEffect(() => {
-    setUser(getSession());
+    const sessionUser = getSession();
+    if (sessionUser) {
+      setUser(sessionUser);
+      setFormData({
+        name: sessionUser.name,
+        department: sessionUser.department,
+        designation: sessionUser.designation,
+        bio: `I am a ${sessionUser.designation} in the ${sessionUser.department} department, focusing on organizational excellence and team collaboration.`
+      });
+    }
   }, []);
+
+  const isAdmin = user?.role === 'SuperAdmin' || user?.role === 'Admin';
 
   const handleUpdateProfile = (e: React.FormEvent) => {
     e.preventDefault();
+    // In a real app, you would call an API here.
+    // For now, we update local state to simulate a successful save.
+    if (user) {
+      const updatedUser = { ...user, ...formData };
+      setUser(updatedUser);
+    }
+    
     toast({
       title: "Profile Updated",
       description: "Your profile information has been successfully updated.",
@@ -94,7 +118,10 @@ export default function ProfilePage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>Account Details</CardTitle>
-              <p className="text-sm text-muted-foreground">Update your personal and professional profile details.</p>
+              <p className="text-sm text-muted-foreground">
+                Update your personal and professional profile details. 
+                {isAdmin ? " (Admin Access: All fields editable)" : " (Some fields locked by Admin)"}
+              </p>
             </div>
             <Edit3 className="w-5 h-5 text-muted-foreground" />
           </CardHeader>
@@ -103,19 +130,35 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="fullName">Full Name</Label>
-                  <Input id="fullName" defaultValue={user.name} />
+                  <Input 
+                    id="fullName" 
+                    value={formData.name} 
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" type="email" defaultValue={user.email} disabled />
+                  <Input id="email" type="email" value={user.email} disabled className="bg-secondary/30" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="department">Department</Label>
-                  <Input id="department" defaultValue={user.department} disabled />
+                  <Input 
+                    id="department" 
+                    value={formData.department} 
+                    disabled={!isAdmin}
+                    className={!isAdmin ? "bg-secondary/30" : ""}
+                    onChange={(e) => setFormData({...formData, department: e.target.value})}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="designation">Designation</Label>
-                  <Input id="designation" defaultValue={user.designation} disabled />
+                  <Input 
+                    id="designation" 
+                    value={formData.designation} 
+                    disabled={!isAdmin}
+                    className={!isAdmin ? "bg-secondary/30" : ""}
+                    onChange={(e) => setFormData({...formData, designation: e.target.value})}
+                  />
                 </div>
               </div>
 
@@ -125,12 +168,13 @@ export default function ProfilePage() {
                   id="bio"
                   className="w-full min-h-[100px] p-3 rounded-md border bg-background text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   placeholder="Tell us a little about your role..."
-                  defaultValue={`I am a ${user.designation} in the ${user.department} department, focusing on organizational excellence and team collaboration.`}
+                  value={formData.bio}
+                  onChange={(e) => setFormData({...formData, bio: e.target.value})}
                 />
               </div>
 
               <div className="pt-4 flex justify-end gap-3">
-                <Button variant="outline">Cancel</Button>
+                <Button type="button" variant="outline" onClick={() => window.location.reload()}>Cancel</Button>
                 <Button type="submit">Save Changes</Button>
               </div>
             </form>
