@@ -273,20 +273,25 @@ export default function RecruitmentPage() {
   const handleScheduleInterview = () => {
     if (!viewingApplicant) return;
     
+    // Dispatch a custom event to notify HR in the DashboardLayout
+    const event = new CustomEvent('add-notification', {
+      detail: {
+        id: Math.random().toString(36).substr(2, 9),
+        title: 'New Interview Requested',
+        message: `An interview needs to be scheduled for ${viewingApplicant.name} (${viewingApplicant.email}).`,
+        time: 'Just now',
+        read: false,
+        type: 'info'
+      }
+    });
+    window.dispatchEvent(event);
+
     toast({
-      title: "Scheduling Initiated",
-      description: `Opening interview availability calendar for ${viewingApplicant.name}...`,
+      title: "HR Notified",
+      description: `A scheduling notification has been sent to the HR department for ${viewingApplicant.name}.`,
     });
 
-    // In a real app, this would open a calendar picker or integrated tool
-    // For now we simulate the process
-    setTimeout(() => {
-      toast({
-        title: "Invitation Sent",
-        description: `A calendar invitation has been drafted for ${viewingApplicant.name}. Check your email to finalize.`,
-      });
-      setIsResumeOpen(false);
-    }, 1500);
+    setIsResumeOpen(false);
   };
 
   const selectedJob = jobListings.find(j => j.id === selectedJobId);

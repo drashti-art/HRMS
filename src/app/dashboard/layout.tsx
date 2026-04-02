@@ -75,6 +75,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     } else {
       setUser(session);
     }
+
+    // Listen for global notifications
+    const handleNewNotification = (event: any) => {
+      if (event.detail) {
+        setNotifications(prev => [event.detail, ...prev]);
+      }
+    };
+
+    window.addEventListener('add-notification', handleNewNotification);
+    return () => window.removeEventListener('add-notification', handleNewNotification);
   }, [router]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
