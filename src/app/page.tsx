@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect } from 'react';
@@ -28,7 +29,7 @@ export default function HomePage() {
             className="object-contain"
           />
         </div>
-        <p className="text-muted-foreground font-medium">Loading WorkNest HR...</p>
+        <p className="text-muted-foreground font-medium">Loading Banas Dairy HR...</p>
       </div>
     </div>
   );

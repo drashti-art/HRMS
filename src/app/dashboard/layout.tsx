@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -250,7 +251,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold leading-none">WorkNest AI</h4>
+                  <h4 className="text-sm font-bold leading-none">Banas Dairy AI</h4>
                   <p className="text-[10px] text-white/70">Always online Assistant</p>
                 </div>
               </div>
@@ -267,7 +268,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </div>
                   <div className="bg-secondary/40 p-3 rounded-2xl rounded-tl-none max-w-[85%]">
                     <p className="text-sm leading-relaxed">
-                      Hello {user.name}! I'm your WorkNest AI assistant. How can I help you today?
+                      Hello {user.name}! I'm your Banas Dairy AI assistant. How can I help you today?
                     </p>
                   </div>
                 </div>

@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI-powered job description generator.
@@ -38,17 +39,17 @@ const prompt = ai.definePrompt({
   name: 'aiJobDescriptionGeneratorPrompt',
   input: {schema: AiJobDescriptionGeneratorInputSchema},
   output: {schema: AiJobDescriptionGeneratorOutputSchema},
-  prompt: `You are an expert HR job description writer for a modern Human Resource Management System. Your task is to craft clear, comprehensive, and well-formatted job descriptions based on the provided details.
+  prompt: `You are an expert HR job description writer for Banas Dairy. Your task is to craft clear, comprehensive, and professional job descriptions based on the provided details.
 
-Generate a detailed job description that includes a brief company overview (assume a fictional tech company named 'WorkNest HR'), the main responsibilities, required qualifications, preferred qualifications, and benefits. Use the provided job title, department, and key responsibilities as the core information.
+Generate a detailed job description that includes a brief company overview for Banas Dairy (Palanpur, Gujarat), the main responsibilities, required qualifications, preferred qualifications, and benefits. Use the provided job title, department, and key responsibilities as the core information.
 
 # Job Title: {{{jobTitle}}}
 
 ## Department: {{{department}}}
 
-## About WorkNest HR
+## About Banas Dairy
 
-WorkNest HR is a leading innovator in HR management solutions, dedicated to empowering businesses and their employees through cutting-edge technology. We foster a collaborative and dynamic environment where talent thrives.
+Banas Dairy (Banaskantha District Co-operative Milk Producers' Union Ltd.) is a state-of-the-art dairy processing unit and Asia's largest milk producer. We are committed to the socio-economic development of rural milk producers and providing the highest quality dairy products to our consumers.
 
 ## Key Responsibilities
 
@@ -64,16 +65,15 @@ WorkNest HR is a leading innovator in HR management solutions, dedicated to empo
 ## Preferred Qualifications
 
 - Master's degree or professional certifications relevant to the role.
-- Experience with HR management systems or similar software.
-- Demonstrated ability to adapt to new technologies and processes.
+- Experience in the FMCG or dairy industry.
+- Knowledge of local cooperative structures and dairy operations.
 
 ## Benefits
 
-- Competitive salary and comprehensive health, dental, and vision benefits.
-- Generous paid time off, including holidays and sick leave.
-- Flexible work arrangements and a supportive work-life balance culture.
-- Opportunities for continuous professional development, training, and career advancement.
-- A vibrant, inclusive, and collaborative company culture with regular team events.`,
+- Competitive salary and comprehensive benefits package.
+- Contribution to rural development and social impact.
+- Supportive work environment and growth opportunities.
+- Training and professional development.`,
 });
 
 const aiJobDescriptionGeneratorFlow = ai.defineFlow(

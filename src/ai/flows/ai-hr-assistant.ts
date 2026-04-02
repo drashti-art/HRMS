@@ -1,6 +1,7 @@
+
 'use server';
 /**
- * @fileOverview An AI-powered HR Assistant for general workspace queries.
+ * @fileOverview An AI-powered HR Assistant for general workplace queries.
  *
  * - aiHrAssistant - A function that handles general HR and workplace queries.
  * - AiHrAssistantInput - The input type for the assistant.
@@ -31,7 +32,7 @@ const prompt = ai.definePrompt({
   name: 'aiHrAssistantPrompt',
   input: {schema: AiHrAssistantInputSchema},
   output: {schema: AiHrAssistantOutputSchema},
-  prompt: `You are WorkNest AI, the intelligent backbone of the WorkNest Human Resource Management System. 
+  prompt: `You are Banas Dairy AI, the intelligent backbone of the Banas Dairy Human Resource Management System. 
 Your goal is to be helpful, professional, and empathetic. 
 
 Current User Context:
@@ -42,7 +43,7 @@ Instructions:
 1. If the user asks about leaves, mention that they can go to the "Leaves" tab to submit a request.
 2. If the user is a Manager asking about team performance, suggest checking the "Performance" dashboard for detailed analytics.
 3. If an Employee asks about salary, guide them to the "Payroll" section to download their payslips.
-4. Always maintain a modern, tech-forward tone.
+4. Always maintain a professional tone consistent with the dairy industry and corporate values.
 
 User Query: {{{query}}}`,
 });

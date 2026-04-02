@@ -4,8 +4,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'WorkNest HR | Modern HRMS',
-  description: 'Full Stack Human Resource Management System with AI tools',
+  title: 'Banas Dairy HR | Modern HRMS',
+  description: 'Full Stack Human Resource Management System with AI tools for Banas Dairy',
 };
 
 export default function RootLayout({

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -106,7 +107,7 @@ export default function EmployeesPage() {
       const printContent = `
         <html>
           <head>
-            <title>Employee Directory - WorkNest HR</title>
+            <title>Employee Directory - Banas Dairy</title>
             <style>
               body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 40px; color: #333; }
               .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #2E2E6B; padding-bottom: 20px; margin-bottom: 30px; }
@@ -120,7 +121,7 @@ export default function EmployeesPage() {
           </head>
           <body>
             <div class="header">
-              <div class="logo-text">WorkNest HR</div>
+              <div class="logo-text">Banas Dairy</div>
               <div class="title">Employee Directory Report</div>
             </div>
             <p>Generated on: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
@@ -148,7 +149,7 @@ export default function EmployeesPage() {
               </tbody>
             </table>
             <div class="meta">
-              WorkNest HR Management System • Confidential Organizational Document
+              Banas Dairy HR Management System • Confidential Organizational Document
             </div>
           </body>
         </html>
@@ -211,7 +212,7 @@ export default function EmployeesPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-primary font-headline">Employee Management</h1>
-          <p className="text-muted-foreground">View and manage all organization personnel records.</p>
+          <p className="text-muted-foreground">View and manage all Banas Dairy personnel records.</p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline" className="gap-2" onClick={handleExport}>
@@ -247,7 +248,7 @@ export default function EmployeesPage() {
                   <Input 
                     id="email" 
                     type="email" 
-                    placeholder="john@worknest.com" 
+                    placeholder="john@banasdairy.coop" 
                     value={newEmployee.email}
                     onChange={(e) => setNewEmployee({...newEmployee, email: e.target.value})}
                     required

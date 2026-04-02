@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -187,7 +188,7 @@ export default function PayrollPage() {
           </head>
           <body>
             <div class="header">
-              <div class="logo">WorkNest HR</div>
+              <div class="logo">Banas Dairy</div>
               <h1>Salary Slip: ${record.date}</h1>
             </div>
             <div class="details">
@@ -220,7 +221,7 @@ export default function PayrollPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-primary">Payroll Management</h1>
-          <p className="text-muted-foreground">Manage organization-wide salary cycles and individual payslips.</p>
+          <p className="text-muted-foreground">Manage Banas Dairy salary cycles and individual payslips.</p>
         </div>
         {isAdminOrHR && (
           <div className="flex gap-3">

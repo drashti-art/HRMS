@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -70,7 +71,7 @@ export function Sidebar({ role }: SidebarProps) {
             className="object-contain"
           />
         </div>
-        <span className="font-bold text-xl text-primary tracking-tight">WorkNest</span>
+        <span className="font-bold text-xl text-primary tracking-tight">Banas Dairy</span>
       </div>
       
       <div className="flex-1 overflow-y-auto py-6 px-3 space-y-1">

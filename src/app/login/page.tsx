@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -65,7 +66,7 @@ export default function LoginPage() {
               />
             </div>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-primary">WorkNest HR</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-primary">Banas Dairy HR</h1>
           <p className="text-muted-foreground">The all-in-one HR Management System</p>
         </div>
 
@@ -81,7 +82,7 @@ export default function LoginPage() {
                 <Input 
                   id="email" 
                   type="email" 
-                  placeholder="name@worknest.com" 
+                  placeholder="name@banasdairy.coop" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required 
