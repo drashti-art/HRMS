@@ -18,7 +18,10 @@ import {
   Clock,
   ShieldAlert,
   UserPlus,
-  Plus
+  Plus,
+  Info,
+  Star,
+  Send
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -39,8 +42,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { Separator } from '@/components/ui/separator';
 
 export default function MyTeamPage() {
   const [manager, setManager] = useState<User | null>(null);
@@ -51,6 +57,14 @@ export default function MyTeamPage() {
     email: '',
     designation: ''
   });
+
+  // Action Dialog States
+  const [selectedMember, setSelectedMember] = useState<User | null>(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState([85]);
+  const [reviewComment, setReviewComment] = useState('');
+
   const { toast } = useToast();
   const router = useRouter();
 
@@ -88,6 +102,40 @@ export default function MyTeamPage() {
       title: "Team Member Added",
       description: `${member.name} has been added to the ${manager.department} team.`,
     });
+  };
+
+  const handleViewProfile = (member: User) => {
+    setSelectedMember(member);
+    setIsProfileOpen(true);
+  };
+
+  const handlePerformanceReview = (member: User) => {
+    setSelectedMember(member);
+    setReviewRating([85]);
+    setReviewComment('');
+    setIsReviewOpen(true);
+  };
+
+  const submitReview = () => {
+    if (!selectedMember) return;
+    
+    toast({
+      title: "Review Submitted",
+      description: `Performance evaluation for ${selectedMember.name} has been recorded.`,
+    });
+    
+    setIsReviewOpen(false);
+  };
+
+  const handleSendEmail = (member: User) => {
+    toast({
+      title: "Opening Email Client",
+      description: `Drafting internal message for ${member.email}...`,
+    });
+    
+    setTimeout(() => {
+      window.location.href = `mailto:${member.email}?subject=Message from your Manager`;
+    }, 500);
   };
 
   if (!manager || (manager.role !== 'Manager' && manager.role !== 'SuperAdmin')) {
@@ -268,13 +316,13 @@ export default function MyTeamPage() {
                         <DropdownMenuContent align="end" className="w-48">
                           <DropdownMenuLabel>Member Options</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="gap-2 cursor-pointer">
+                          <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => handleViewProfile(member)}>
                             <UserCircle className="w-4 h-4" /> View Profile
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="gap-2 cursor-pointer">
+                          <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => handlePerformanceReview(member)}>
                             <TrendingUp className="w-4 h-4" /> Performance Review
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="gap-2 cursor-pointer">
+                          <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => handleSendEmail(member)}>
                             <Mail className="w-4 h-4" /> Send Email
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -334,6 +382,114 @@ export default function MyTeamPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* View Profile Dialog */}
+      <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserCircle className="w-5 h-5 text-primary" /> Member Profile
+            </DialogTitle>
+          </DialogHeader>
+          {selectedMember && (
+            <div className="space-y-6 pt-4">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-2xl font-bold text-primary">
+                  {selectedMember.name.charAt(0)}
+                </div>
+                <div className="text-center">
+                  <h3 className="text-xl font-bold">{selectedMember.name}</h3>
+                  <p className="text-sm text-muted-foreground">{selectedMember.designation}</p>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <Mail className="w-4 h-4" /> Email Address
+                  </span>
+                  <span className="font-medium">{selectedMember.email}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <Clock className="w-4 h-4" /> Joined Date
+                  </span>
+                  <span className="font-medium">{selectedMember.joiningDate}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <Users className="w-4 h-4" /> Department
+                  </span>
+                  <Badge variant="secondary">{selectedMember.department}</Badge>
+                </div>
+              </div>
+
+              <DialogFooter className="pt-4">
+                <Button className="w-full gap-2" onClick={() => handleSendEmail(selectedMember)}>
+                  <Send className="w-4 h-4" /> Send Official Message
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Performance Review Dialog */}
+      <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-primary" /> Performance Evaluation
+            </DialogTitle>
+            <DialogDescription>
+              Recording metrics and feedback for {selectedMember?.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 pt-4">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <Label className="text-sm font-bold">Overall Rating: {reviewRating[0]}%</Label>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star key={s} className={cn("w-4 h-4", s <= Math.round(reviewRating[0]/20) ? "text-amber-500 fill-amber-500" : "text-muted-foreground")} />
+                  ))}
+                </div>
+              </div>
+              <Slider 
+                value={reviewRating} 
+                onValueChange={setReviewRating} 
+                max={100} 
+                step={1} 
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="review-comment">Feedback & Goal Setting</Label>
+              <Textarea 
+                id="review-comment"
+                placeholder="Describe strengths and areas for improvement..."
+                className="min-h-[120px]"
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+              />
+            </div>
+
+            <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
+              <h4 className="text-xs font-bold text-primary uppercase mb-2">Manager Tip</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Constructive feedback should be specific, actionable, and delivered in a timely manner to encourage growth.
+              </p>
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button variant="outline" onClick={() => setIsReviewOpen(false)}>Cancel</Button>
+              <Button onClick={submitReview} disabled={!reviewComment}>Submit Evaluation</Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
