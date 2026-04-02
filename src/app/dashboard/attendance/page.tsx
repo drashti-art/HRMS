@@ -15,11 +15,20 @@ import {
   LogIn,
   LogOut,
   Coffee,
-  User as UserIcon
+  User as UserIcon,
+  Info
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { getSession } from '@/lib/auth';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Separator } from '@/components/ui/separator';
 
 interface AttendanceRecord {
   id: string;
@@ -29,14 +38,16 @@ interface AttendanceRecord {
   clockOut: string | null;
   status: 'On Time' | 'Late' | 'Absent';
   totalHours: string;
+  location?: string;
+  device?: string;
 }
 
 const MOCK_HISTORY: AttendanceRecord[] = [
-  { id: '1', employeeName: 'Jim Halpert', date: '2024-03-14', clockIn: '08:55 AM', clockOut: '06:05 PM', status: 'On Time', totalHours: '9h 10m' },
-  { id: '2', employeeName: 'Pam Beesly', date: '2024-03-14', clockIn: '09:00 AM', clockOut: '06:00 PM', status: 'On Time', totalHours: '9h 00m' },
-  { id: '3', employeeName: 'Michael Scott', date: '2024-03-13', clockIn: '09:15 AM', clockOut: '06:15 PM', status: 'Late', totalHours: '9h 00m' },
-  { id: '4', employeeName: 'Dwight Schrute', date: '2024-03-12', clockIn: '08:50 AM', clockOut: '05:30 PM', status: 'On Time', totalHours: '8h 40m' },
-  { id: '5', employeeName: 'Angela Martin', date: '2024-03-11', clockIn: '09:05 AM', clockOut: '06:00 PM', status: 'On Time', totalHours: '8h 55m' },
+  { id: '1', employeeName: 'Jim Halpert', date: '2024-03-14', clockIn: '08:55 AM', clockOut: '06:05 PM', status: 'On Time', totalHours: '9h 10m', location: 'Office - HQ', device: 'Web App' },
+  { id: '2', employeeName: 'Pam Beesly', date: '2024-03-14', clockIn: '09:00 AM', clockOut: '06:00 PM', status: 'On Time', totalHours: '9h 00m', location: 'Remote', device: 'Mobile App' },
+  { id: '3', employeeName: 'Michael Scott', date: '2024-03-13', clockIn: '09:15 AM', clockOut: '06:15 PM', status: 'Late', totalHours: '9h 00m', location: 'Office - HQ', device: 'Web App' },
+  { id: '4', employeeName: 'Dwight Schrute', date: '2024-03-12', clockIn: '08:50 AM', clockOut: '05:30 PM', status: 'On Time', totalHours: '8h 40m', location: 'Office - HQ', device: 'Biometric' },
+  { id: '5', employeeName: 'Angela Martin', date: '2024-03-11', clockIn: '09:05 AM', clockOut: '06:00 PM', status: 'On Time', totalHours: '8h 55m', location: 'Office - HQ', device: 'Web App' },
 ];
 
 export default function AttendancePage() {
@@ -46,6 +57,8 @@ export default function AttendancePage() {
   const [clockInTime, setClockInTime] = useState<string | null>(null);
   const [attendanceHistory, setAttendanceHistory] = useState<AttendanceRecord[]>(MOCK_HISTORY);
   const [user, setUser] = useState<any>(null);
+  const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   useEffect(() => {
     setUser(getSession());
@@ -75,7 +88,9 @@ export default function AttendancePage() {
         clockIn: clockInTime || '--',
         clockOut: timeStr,
         status: 'On Time',
-        totalHours: '8h 30m' // Mocked calculated time
+        totalHours: '8h 30m',
+        location: 'Office - HQ',
+        device: 'Web App'
       };
       
       setAttendanceHistory([newRecord, ...attendanceHistory]);
@@ -85,6 +100,11 @@ export default function AttendancePage() {
         description: `Successfully clocked out at ${timeStr}. See you tomorrow!`,
       });
     }
+  };
+
+  const handleShowDetails = (record: AttendanceRecord) => {
+    setSelectedRecord(record);
+    setIsDetailsOpen(true);
   };
 
   return (
@@ -263,7 +283,12 @@ export default function AttendancePage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" className="h-8 text-xs text-primary hover:text-primary hover:bg-primary/5">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 text-xs text-primary hover:text-primary hover:bg-primary/5"
+                      onClick={() => handleShowDetails(record)}
+                    >
                       Details
                     </Button>
                   </TableCell>
@@ -273,6 +298,85 @@ export default function AttendancePage() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Details Dialog */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Info className="w-5 h-5 text-primary" />
+              Attendance Details
+            </DialogTitle>
+            <DialogDescription>
+              Detailed shift information for {selectedRecord?.employeeName}.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedRecord && (
+            <div className="space-y-6 pt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase">Employee</p>
+                  <p className="font-bold text-sm">{selectedRecord.employeeName}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase">Date</p>
+                  <p className="font-bold text-sm">{selectedRecord.date}</p>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase">Clock In</p>
+                  <div className="flex items-center gap-2 text-emerald-600">
+                    <LogIn className="w-4 h-4" />
+                    <span className="font-bold text-sm">{selectedRecord.clockIn}</span>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase">Clock Out</p>
+                  <div className="flex items-center gap-2 text-rose-600">
+                    <LogOut className="w-4 h-4" />
+                    <span className="font-bold text-sm">{selectedRecord.clockOut || 'N/A'}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase">Total Duration</p>
+                  <p className="font-bold text-sm">{selectedRecord.totalHours}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase">Status</p>
+                  <Badge variant="outline" className="h-5 text-[10px]">
+                    {selectedRecord.status}
+                  </Badge>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3 bg-secondary/20 p-4 rounded-lg">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <MapPin className="w-3 h-3" /> Location
+                  </span>
+                  <span className="font-medium">{selectedRecord.location || 'Not Specified'}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <UserIcon className="w-3 h-3" /> Source Device
+                  </span>
+                  <span className="font-medium">{selectedRecord.device || 'System'}</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
