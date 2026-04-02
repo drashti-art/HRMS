@@ -16,11 +16,12 @@ import {
   LogOut,
   Coffee,
   User as UserIcon,
-  Info
+  Info,
+  Search
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { getSession } from '@/lib/auth';
+import { getSession, User } from '@/lib/auth';
 import {
   Dialog,
   DialogContent,
@@ -29,10 +30,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
 
 interface AttendanceRecord {
   id: string;
   employeeName: string;
+  department: string;
   date: string;
   clockIn: string;
   clockOut: string | null;
@@ -43,11 +46,13 @@ interface AttendanceRecord {
 }
 
 const MOCK_HISTORY: AttendanceRecord[] = [
-  { id: '1', employeeName: 'Jim Halpert', date: '2024-03-14', clockIn: '08:55 AM', clockOut: '06:05 PM', status: 'On Time', totalHours: '9h 10m', location: 'Office - HQ', device: 'Web App' },
-  { id: '2', employeeName: 'Pam Beesly', date: '2024-03-14', clockIn: '09:00 AM', clockOut: '06:00 PM', status: 'On Time', totalHours: '9h 00m', location: 'Remote', device: 'Mobile App' },
-  { id: '3', employeeName: 'Michael Scott', date: '2024-03-13', clockIn: '09:15 AM', clockOut: '06:15 PM', status: 'Late', totalHours: '9h 00m', location: 'Office - HQ', device: 'Web App' },
-  { id: '4', employeeName: 'Dwight Schrute', date: '2024-03-12', clockIn: '08:50 AM', clockOut: '05:30 PM', status: 'On Time', totalHours: '8h 40m', location: 'Office - HQ', device: 'Biometric' },
-  { id: '5', employeeName: 'Angela Martin', date: '2024-03-11', clockIn: '09:05 AM', clockOut: '06:00 PM', status: 'On Time', totalHours: '8h 55m', location: 'Office - HQ', device: 'Web App' },
+  { id: '1', employeeName: 'Jim Halpert', department: 'Sales', date: '2024-03-14', clockIn: '08:55 AM', clockOut: '06:05 PM', status: 'On Time', totalHours: '9h 10m', location: 'Office - HQ', device: 'Web App' },
+  { id: '2', employeeName: 'Pam Beesly', department: 'Sales', date: '2024-03-14', clockIn: '09:00 AM', clockOut: '06:00 PM', status: 'On Time', totalHours: '9h 00m', location: 'Remote', device: 'Mobile App' },
+  { id: '3', employeeName: 'Michael Scott', department: 'Sales', date: '2024-03-13', clockIn: '09:15 AM', clockOut: '06:15 PM', status: 'Late', totalHours: '9h 00m', location: 'Office - HQ', device: 'Web App' },
+  { id: '4', employeeName: 'Dwight Schrute', department: 'Sales', date: '2024-03-12', clockIn: '08:50 AM', clockOut: '05:30 PM', status: 'On Time', totalHours: '8h 40m', location: 'Office - HQ', device: 'Biometric' },
+  { id: '5', employeeName: 'Angela Martin', department: 'Finance', date: '2024-03-11', clockIn: '09:05 AM', clockOut: '06:00 PM', status: 'On Time', totalHours: '8h 55m', location: 'Office - HQ', device: 'Web App' },
+  { id: '6', employeeName: 'Oscar Martinez', department: 'Finance', date: '2024-03-11', clockIn: '08:55 AM', clockOut: '05:45 PM', status: 'On Time', totalHours: '8h 50m', location: 'Office - HQ', device: 'Web App' },
+  { id: '7', employeeName: 'Kelly Kapoor', department: 'Customer Support', date: '2024-03-10', clockIn: '09:10 AM', clockOut: '06:10 PM', status: 'Late', totalHours: '9h 00m', location: 'Office - HQ', device: 'Web App' },
 ];
 
 export default function AttendancePage() {
@@ -56,9 +61,10 @@ export default function AttendancePage() {
   const [isClockedIn, setIsClockedIn] = useState(false);
   const [activeRecordId, setActiveRecordId] = useState<string | null>(null);
   const [attendanceHistory, setAttendanceHistory] = useState<AttendanceRecord[]>(MOCK_HISTORY);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     setUser(getSession());
@@ -77,6 +83,7 @@ export default function AttendancePage() {
       const newRecord: AttendanceRecord = {
         id: newRecordId,
         employeeName: user?.name || 'Current User',
+        department: user?.department || 'General',
         date: dateStr,
         clockIn: timeStr,
         clockOut: null,
@@ -124,12 +131,44 @@ export default function AttendancePage() {
     setIsDetailsOpen(true);
   };
 
+  // Logic to filter logs based on role
+  const filteredHistory = attendanceHistory.filter(record => {
+    // 1. Search term filter
+    const matchesSearch = record.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         record.department.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (!matchesSearch) return false;
+
+    // 2. Role based visibility
+    if (!user) return false;
+
+    if (user.role === 'SuperAdmin' || user.role === 'Admin' || user.role === 'HR') {
+      return true; // See everyone
+    }
+
+    if (user.role === 'Manager') {
+      return record.department === user.department; // See only their department
+    }
+
+    // Default: Employees see only themselves
+    return record.employeeName === user.name;
+  });
+
+  const isManager = user?.role === 'Manager';
+  const isAdminOrHR = user?.role === 'SuperAdmin' || user?.role === 'Admin' || user?.role === 'HR';
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-primary">Attendance Tracking</h1>
-          <p className="text-muted-foreground">Manage daily work hours and check-in logs organization-wide.</p>
+          <p className="text-muted-foreground">
+            {isManager 
+              ? `Monitoring attendance for the ${user?.department} team.` 
+              : isAdminOrHR 
+                ? "Manage organization-wide check-in logs and work hours." 
+                : "Manage your daily work hours and check-in logs."}
+          </p>
         </div>
         <div className="text-right">
           <p className="text-2xl font-bold text-primary font-mono">
@@ -249,73 +288,106 @@ export default function AttendancePage() {
       </div>
 
       <Card className="dashboard-card border-none shadow-lg">
-        <CardHeader className="flex flex-row items-center justify-between border-b">
+        <CardHeader className="flex flex-col md:flex-row items-center justify-between border-b gap-4">
           <div>
-            <CardTitle>Attendance History</CardTitle>
-            <CardDescription>Employee check-in/out logs across the organization.</CardDescription>
+            <CardTitle>
+              {isManager ? "Team Attendance Logs" : isAdminOrHR ? "Organization Attendance History" : "Personal Attendance History"}
+            </CardTitle>
+            <CardDescription>
+              {isManager 
+                ? `Showing check-in logs for members of the ${user?.department} department.` 
+                : "Review check-in and check-out timestamps."}
+            </CardDescription>
           </div>
-          <Button variant="outline" size="sm" className="gap-2">
-            <CalendarIcon className="w-4 h-4" /> Filter by Date
-          </Button>
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="relative flex-1 md:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Search staff..." 
+                className="pl-9 h-9"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Button variant="outline" size="sm" className="gap-2 shrink-0">
+              <CalendarIcon className="w-4 h-4" /> Filter
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader className="bg-secondary/20">
-              <TableRow>
-                <TableHead className="font-bold">Employee</TableHead>
-                <TableHead className="font-bold">Date</TableHead>
-                <TableHead className="font-bold">Clock In</TableHead>
-                <TableHead className="font-bold">Clock Out</TableHead>
-                <TableHead className="font-bold">Total Hours</TableHead>
-                <TableHead className="font-bold">Status</TableHead>
-                <TableHead className="text-right font-bold">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {attendanceHistory.map((record) => (
-                <TableRow key={record.id} className={cn("hover:bg-accent/5 transition-colors", record.status === 'Active' && "bg-primary/5")}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold text-primary">
-                        {record.employeeName.charAt(0)}
-                      </div>
-                      <span className="font-medium text-sm">{record.employeeName}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm">{record.date}</TableCell>
-                  <TableCell className="text-sm">{record.clockIn}</TableCell>
-                  <TableCell className="text-sm">
-                    {record.clockOut || (record.status === 'Active' ? <span className="text-primary animate-pulse font-medium">Working...</span> : '--')}
-                  </TableCell>
-                  <TableCell className="text-sm">{record.totalHours}</TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant="outline" 
-                      className={cn(
-                        "font-medium text-[10px] h-5",
-                        record.status === 'On Time' && "bg-emerald-50 text-emerald-700 border-emerald-200",
-                        record.status === 'Late' && "bg-amber-50 text-amber-700 border-amber-200",
-                        record.status === 'Absent' && "bg-rose-50 text-rose-700 border-rose-200",
-                        record.status === 'Active' && "bg-primary/10 text-primary border-primary/20"
-                      )}
-                    >
-                      {record.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-8 text-xs text-primary hover:text-primary hover:bg-primary/5"
-                      onClick={() => handleShowDetails(record)}
-                    >
-                      Details
-                    </Button>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-secondary/20">
+                <TableRow>
+                  <TableHead className="font-bold">Employee</TableHead>
+                  <TableHead className="font-bold">Dept</TableHead>
+                  <TableHead className="font-bold">Date</TableHead>
+                  <TableHead className="font-bold">Clock In</TableHead>
+                  <TableHead className="font-bold">Clock Out</TableHead>
+                  <TableHead className="font-bold">Total Hours</TableHead>
+                  <TableHead className="font-bold">Status</TableHead>
+                  <TableHead className="text-right font-bold">Action</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredHistory.length > 0 ? (
+                  filteredHistory.map((record) => (
+                    <TableRow key={record.id} className={cn("hover:bg-accent/5 transition-colors", record.status === 'Active' && "bg-primary/5")}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold text-primary">
+                            {record.employeeName.charAt(0)}
+                          </div>
+                          <span className="font-medium text-sm">{record.employeeName}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-[9px] h-4">
+                          {record.department}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm">{record.date}</TableCell>
+                      <TableCell className="text-sm">{record.clockIn}</TableCell>
+                      <TableCell className="text-sm">
+                        {record.clockOut || (record.status === 'Active' ? <span className="text-primary animate-pulse font-medium">Working...</span> : '--')}
+                      </TableCell>
+                      <TableCell className="text-sm">{record.totalHours}</TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant="outline" 
+                          className={cn(
+                            "font-medium text-[10px] h-5",
+                            record.status === 'On Time' && "bg-emerald-50 text-emerald-700 border-emerald-200",
+                            record.status === 'Late' && "bg-amber-50 text-amber-700 border-amber-200",
+                            record.status === 'Absent' && "bg-rose-50 text-rose-700 border-rose-200",
+                            record.status === 'Active' && "bg-primary/10 text-primary border-primary/20"
+                          )}
+                        >
+                          {record.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 text-xs text-primary hover:text-primary hover:bg-primary/5"
+                          onClick={() => handleShowDetails(record)}
+                        >
+                          Details
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
+                      No attendance records found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
