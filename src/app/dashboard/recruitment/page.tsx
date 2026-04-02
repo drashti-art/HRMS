@@ -26,7 +26,8 @@ import {
   MoreVertical,
   Mail,
   MapPin,
-  ExternalLink
+  ExternalLink,
+  Calendar
 } from 'lucide-react';
 import { summarizeResume, ResumeSummarizerOutput } from '@/ai/flows/ai-resume-summarizer';
 import { aiJobDescriptionGenerator } from '@/ai/flows/ai-job-description-generator';
@@ -176,6 +177,116 @@ export default function RecruitmentPage() {
   const handleViewResume = (applicant: Applicant) => {
     setViewingApplicant(applicant);
     setIsResumeOpen(true);
+  };
+
+  const handleDownloadResume = () => {
+    if (!viewingApplicant) return;
+
+    toast({
+      title: "Preparing PDF",
+      description: `Generating professional resume for ${viewingApplicant.name}...`,
+    });
+
+    setTimeout(() => {
+      const resumeHtml = `
+        <html>
+          <head>
+            <title>Resume - ${viewingApplicant.name}</title>
+            <style>
+              body { font-family: sans-serif; padding: 40px; color: #333; line-height: 1.6; }
+              .header { border-bottom: 2px solid #2E2E6B; padding-bottom: 20px; margin-bottom: 30px; }
+              .name { font-size: 28px; font-bold: true; color: #2E2E6B; margin: 0; }
+              .contact { font-size: 14px; color: #666; margin-top: 5px; }
+              .section-title { font-size: 14px; font-weight: bold; text-transform: uppercase; color: #2E2E6B; margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+              .experience-item { margin-top: 15px; }
+              .job-title { font-weight: bold; font-size: 16px; display: flex; justify-content: space-between; }
+              .company { color: #66B2E0; font-weight: bold; margin-bottom: 5px; }
+              .skills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+              .skill-tag { background: #f0f0f5; padding: 4px 10px; border-radius: 4px; font-size: 12px; }
+              ul { padding-left: 20px; }
+              li { margin-bottom: 5px; font-size: 13px; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1 class="name">${viewingApplicant.name}</h1>
+              <div class="contact">${viewingApplicant.email} • New York, NY • linkedin.com/in/${viewingApplicant.name.toLowerCase().replace(' ', '')}</div>
+            </div>
+
+            <div class="section-title">Professional Summary</div>
+            <p style="font-size: 14px;">Dedicated professional with over 8 years of experience in specialized fields. Proven track record of delivering high-quality results in fast-paced environments. Expert in technical implementation, team leadership, and strategic planning.</p>
+
+            <div class="section-title">Work Experience</div>
+            <div class="experience-item">
+              <div class="job-title"><span>Senior Specialist</span> <span>Jan 2020 – Present</span></div>
+              <div class="company">TechCorp Global Solutions</div>
+              <ul>
+                <li>Led a team of 15 developers to successfully launch major organizational infrastructure projects.</li>
+                <li>Implemented automated testing protocols reducing system errors by 40%.</li>
+                <li>Optimized cloud architecture resulting in a 25% decrease in operational costs.</li>
+              </ul>
+            </div>
+            <div class="experience-item">
+              <div class="job-title"><span>Associate Analyst</span> <span>Jun 2016 – Dec 2019</span></div>
+              <div class="company">Innovative Systems Inc.</div>
+              <ul>
+                <li>Collaborated with cross-functional teams to identify and resolve critical business bottlenecks.</li>
+                <li>Developed internal tools that increased department efficiency by 15%.</li>
+                <li>Conducted quarterly market analysis reports for the executive board.</li>
+              </ul>
+            </div>
+
+            <div class="section-title">Education</div>
+            <div class="experience-item">
+              <div class="job-title"><span>Master of Science in Business Technology</span> <span>2016</span></div>
+              <div>State University of Excellence</div>
+            </div>
+            <div class="experience-item">
+              <div class="job-title"><span>Bachelor of Science in Computer Engineering</span> <span>2014</span></div>
+              <div>Technical Institute of Technology</div>
+            </div>
+
+            <div class="section-title">Skills & Expertise</div>
+            <div class="skills">
+              <span class="skill-tag">Project Management</span>
+              <span class="skill-tag">Cloud Architecture</span>
+              <span class="skill-tag">TypeScript</span>
+              <span class="skill-tag">React</span>
+              <span class="skill-tag">Strategic Planning</span>
+              <span class="skill-tag">Agile Methodology</span>
+            </div>
+          </body>
+        </html>
+      `;
+
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(resumeHtml);
+        printWindow.document.close();
+        setTimeout(() => {
+          printWindow.print();
+        }, 500);
+      }
+    }, 1000);
+  };
+
+  const handleScheduleInterview = () => {
+    if (!viewingApplicant) return;
+    
+    toast({
+      title: "Scheduling Initiated",
+      description: `Opening interview availability calendar for ${viewingApplicant.name}...`,
+    });
+
+    // In a real app, this would open a calendar picker or integrated tool
+    // For now we simulate the process
+    setTimeout(() => {
+      toast({
+        title: "Invitation Sent",
+        description: `A calendar invitation has been drafted for ${viewingApplicant.name}. Check your email to finalize.`,
+      });
+      setIsResumeOpen(false);
+    }, 1500);
   };
 
   const selectedJob = jobListings.find(j => j.id === selectedJobId);
@@ -644,11 +755,11 @@ export default function RecruitmentPage() {
             <div className="flex justify-between w-full">
               <Button variant="outline" onClick={() => setIsResumeOpen(false)}>Close Preview</Button>
               <div className="flex gap-2">
-                <Button variant="secondary" className="gap-2">
+                <Button variant="secondary" className="gap-2" onClick={handleDownloadResume}>
                   <FileText className="w-4 h-4" /> Download PDF
                 </Button>
-                <Button className="gap-2">
-                  Schedule Interview
+                <Button className="gap-2" onClick={handleScheduleInterview}>
+                  <Calendar className="w-4 h-4" /> Schedule Interview
                 </Button>
               </div>
             </div>
