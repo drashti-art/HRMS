@@ -14,13 +14,16 @@ import {
   Timer,
   LogIn,
   LogOut,
-  Coffee
+  Coffee,
+  User as UserIcon
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { getSession } from '@/lib/auth';
 
 interface AttendanceRecord {
   id: string;
+  employeeName: string;
   date: string;
   clockIn: string;
   clockOut: string | null;
@@ -29,11 +32,11 @@ interface AttendanceRecord {
 }
 
 const MOCK_HISTORY: AttendanceRecord[] = [
-  { id: '1', date: '2024-03-14', clockIn: '08:55 AM', clockOut: '06:05 PM', status: 'On Time', totalHours: '9h 10m' },
-  { id: '2', date: '2024-03-13', clockIn: '09:15 AM', clockOut: '06:15 PM', status: 'Late', totalHours: '9h 00m' },
-  { id: '3', date: '2024-03-12', clockIn: '08:50 AM', clockOut: '05:30 PM', status: 'On Time', totalHours: '8h 40m' },
-  { id: '4', date: '2024-03-11', clockIn: '09:05 AM', clockOut: '06:00 PM', status: 'On Time', totalHours: '8h 55m' },
-  { id: '5', date: '2024-03-08', clockIn: '08:45 AM', clockOut: '06:30 PM', status: 'On Time', totalHours: '9h 45m' },
+  { id: '1', employeeName: 'Jim Halpert', date: '2024-03-14', clockIn: '08:55 AM', clockOut: '06:05 PM', status: 'On Time', totalHours: '9h 10m' },
+  { id: '2', employeeName: 'Pam Beesly', date: '2024-03-14', clockIn: '09:00 AM', clockOut: '06:00 PM', status: 'On Time', totalHours: '9h 00m' },
+  { id: '3', employeeName: 'Michael Scott', date: '2024-03-13', clockIn: '09:15 AM', clockOut: '06:15 PM', status: 'Late', totalHours: '9h 00m' },
+  { id: '4', employeeName: 'Dwight Schrute', date: '2024-03-12', clockIn: '08:50 AM', clockOut: '05:30 PM', status: 'On Time', totalHours: '8h 40m' },
+  { id: '5', employeeName: 'Angela Martin', date: '2024-03-11', clockIn: '09:05 AM', clockOut: '06:00 PM', status: 'On Time', totalHours: '8h 55m' },
 ];
 
 export default function AttendancePage() {
@@ -42,8 +45,10 @@ export default function AttendancePage() {
   const [isClockedIn, setIsClockedIn] = useState(false);
   const [clockInTime, setClockInTime] = useState<string | null>(null);
   const [attendanceHistory, setAttendanceHistory] = useState<AttendanceRecord[]>(MOCK_HISTORY);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
+    setUser(getSession());
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
@@ -65,11 +70,12 @@ export default function AttendancePage() {
       
       const newRecord: AttendanceRecord = {
         id: Math.random().toString(36).substr(2, 9),
+        employeeName: user?.name || 'Current User',
         date: now.toISOString().split('T')[0],
         clockIn: clockInTime || '--',
         clockOut: timeStr,
         status: 'On Time',
-        totalHours: 'Working...'
+        totalHours: '8h 30m' // Mocked calculated time
       };
       
       setAttendanceHistory([newRecord, ...attendanceHistory]);
@@ -86,7 +92,7 @@ export default function AttendancePage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-primary">Attendance Tracking</h1>
-          <p className="text-muted-foreground">Manage your daily work hours and check-in logs.</p>
+          <p className="text-muted-foreground">Manage daily work hours and check-in logs organization-wide.</p>
         </div>
         <div className="text-right">
           <p className="text-2xl font-bold text-primary font-mono">
@@ -209,7 +215,7 @@ export default function AttendancePage() {
         <CardHeader className="flex flex-row items-center justify-between border-b">
           <div>
             <CardTitle>Attendance History</CardTitle>
-            <CardDescription>Your check-in/out logs for the past 30 days.</CardDescription>
+            <CardDescription>Employee check-in/out logs across the organization.</CardDescription>
           </div>
           <Button variant="outline" size="sm" className="gap-2">
             <CalendarIcon className="w-4 h-4" /> Filter by Date
@@ -219,6 +225,7 @@ export default function AttendancePage() {
           <Table>
             <TableHeader className="bg-secondary/20">
               <TableRow>
+                <TableHead className="font-bold">Employee</TableHead>
                 <TableHead className="font-bold">Date</TableHead>
                 <TableHead className="font-bold">Clock In</TableHead>
                 <TableHead className="font-bold">Clock Out</TableHead>
@@ -230,15 +237,23 @@ export default function AttendancePage() {
             <TableBody>
               {attendanceHistory.map((record) => (
                 <TableRow key={record.id} className="hover:bg-accent/5 transition-colors">
-                  <TableCell className="font-medium">{record.date}</TableCell>
-                  <TableCell>{record.clockIn}</TableCell>
-                  <TableCell>{record.clockOut || '--'}</TableCell>
-                  <TableCell>{record.totalHours}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold text-primary">
+                        {record.employeeName.charAt(0)}
+                      </div>
+                      <span className="font-medium text-sm">{record.employeeName}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm">{record.date}</TableCell>
+                  <TableCell className="text-sm">{record.clockIn}</TableCell>
+                  <TableCell className="text-sm">{record.clockOut || '--'}</TableCell>
+                  <TableCell className="text-sm">{record.totalHours}</TableCell>
                   <TableCell>
                     <Badge 
                       variant="outline" 
                       className={cn(
-                        "font-medium",
+                        "font-medium text-[10px] h-5",
                         record.status === 'On Time' && "bg-emerald-50 text-emerald-700 border-emerald-200",
                         record.status === 'Late' && "bg-amber-50 text-amber-700 border-amber-200",
                         record.status === 'Absent' && "bg-rose-50 text-rose-700 border-rose-200"
@@ -248,7 +263,7 @@ export default function AttendancePage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" className="text-primary hover:text-primary hover:bg-primary/5">
+                    <Button variant="ghost" size="sm" className="h-8 text-xs text-primary hover:text-primary hover:bg-primary/5">
                       Details
                     </Button>
                   </TableCell>
