@@ -20,7 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getSession, User } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 
-const MOCK_LEAVES = [
+const INITIAL_LEAVES = [
   { id: '1', employee: "John Smith", type: "Annual Leave", start: "2024-03-20", end: "2024-03-25", days: 5, status: "Pending", reason: "Family vacation" },
   { id: '2', employee: "Alice Brown", type: "Sick Leave", start: "2024-03-15", end: "2024-03-16", days: 1, status: "Pending", reason: "Medical appointment" },
   { id: '3', employee: "Bob Wilson", type: "Personal Leave", start: "2024-03-10", end: "2024-03-10", days: 1, status: "Approved", reason: "Personal work" },
@@ -34,12 +34,13 @@ export default function LeavesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('pending');
   const [user, setUser] = useState<User | null>(null);
+  const [leaves, setLeaves] = useState(INITIAL_LEAVES);
 
   useEffect(() => {
     setUser(getSession());
   }, []);
 
-  const filteredLeaves = MOCK_LEAVES.filter(leave => {
+  const filteredLeaves = leaves.filter(leave => {
     const matchesSearch = leave.employee.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          leave.type.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = activeTab === 'all' || leave.status.toLowerCase() === activeTab;
@@ -47,6 +48,10 @@ export default function LeavesPage() {
   });
 
   const handleAction = (id: string, action: 'Approved' | 'Rejected') => {
+    setLeaves(prev => prev.map(leave => 
+      leave.id === id ? { ...leave, status: action } : leave
+    ));
+
     toast({
       title: `Request ${action}`,
       description: `Leave request for employee has been ${action.toLowerCase()}.`,
