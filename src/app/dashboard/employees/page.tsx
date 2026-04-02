@@ -13,7 +13,10 @@ import {
   Filter, 
   Download,
   XCircle,
-  Loader2
+  Loader2,
+  Trash2,
+  Edit,
+  User as UserIcon
 } from 'lucide-react';
 import { MOCK_USERS, Role, User } from '@/lib/auth';
 import {
@@ -32,6 +35,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
 
@@ -110,6 +121,15 @@ export default function EmployeesPage() {
     toast({
       title: "Employee Added",
       description: `${newEmployee.name} has been added to the organization.`,
+    });
+  };
+
+  const handleDeleteEmployee = (id: string, name: string) => {
+    setEmployees(employees.filter(emp => emp.id !== id));
+    toast({
+      variant: "destructive",
+      title: "Employee Removed",
+      description: `${name} has been removed from the organization.`,
     });
   };
 
@@ -312,9 +332,30 @@ export default function EmployeesPage() {
                         {emp.joiningDate}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" className="hover:bg-secondary/50">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="hover:bg-secondary/50">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="gap-2 cursor-pointer">
+                              <UserIcon className="w-4 h-4" /> View Profile
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="gap-2 cursor-pointer">
+                              <Edit className="w-4 h-4" /> Edit Details
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              className="gap-2 cursor-pointer text-destructive focus:text-destructive"
+                              onClick={() => handleDeleteEmployee(emp.id, emp.name)}
+                            >
+                              <Trash2 className="w-4 h-4" /> Delete Employee
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))
