@@ -21,7 +21,8 @@ import {
   Plus,
   Info,
   Star,
-  Send
+  Send,
+  Megaphone
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -65,6 +66,10 @@ export default function MyTeamPage() {
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [reviewRating, setReviewRating] = useState([85]);
   const [reviewComment, setReviewComment] = useState('');
+
+  // Announcement State
+  const [isAnnouncementOpen, setIsAnnouncementOpen] = useState(false);
+  const [announcement, setAnnouncement] = useState({ title: '', content: '' });
 
   const { toast } = useToast();
   const router = useRouter();
@@ -139,6 +144,32 @@ export default function MyTeamPage() {
     }, 500);
   };
 
+  const handleBroadcastAnnouncement = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!announcement.title || !announcement.content) return;
+
+    // Simulate sending notification to all team members
+    const event = new CustomEvent('add-notification', {
+      detail: {
+        id: Math.random().toString(36).substr(2, 9),
+        title: `Team Announcement: ${announcement.title}`,
+        message: announcement.content,
+        time: 'Just now',
+        read: false,
+        type: 'info'
+      }
+    });
+    window.dispatchEvent(event);
+
+    toast({
+      title: "Announcement Sent",
+      description: `Broadcasting to all ${teamMembers.length} members in ${manager?.department}.`,
+    });
+
+    setIsAnnouncementOpen(false);
+    setAnnouncement({ title: '', content: '' });
+  };
+
   if (!manager || (manager.role !== 'Manager' && manager.role !== 'SuperAdmin')) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
@@ -210,9 +241,51 @@ export default function MyTeamPage() {
             </DialogContent>
           </Dialog>
           
-          <Button className="gap-2">
-            <MessageSquare className="w-4 h-4" /> Team Announcement
-          </Button>
+          <Dialog open={isAnnouncementOpen} onOpenChange={setIsAnnouncementOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <MessageSquare className="w-4 h-4" /> Team Announcement
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Megaphone className="w-5 h-5 text-primary" /> Post Team Announcement
+                </DialogTitle>
+                <DialogDescription>
+                  This message will be broadcast to all members in the {manager.department} department.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleBroadcastAnnouncement} className="space-y-4 pt-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="announce-title">Subject</Label>
+                  <Input 
+                    id="announce-title" 
+                    placeholder="e.g. Q1 Team Meeting" 
+                    value={announcement.title}
+                    onChange={(e) => setAnnouncement({...announcement, title: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="announce-content">Message Content</Label>
+                  <Textarea 
+                    id="announce-content" 
+                    placeholder="Detail your announcement here..." 
+                    className="min-h-[150px]"
+                    value={announcement.content}
+                    onChange={(e) => setAnnouncement({...announcement, content: e.target.value})}
+                    required
+                  />
+                </div>
+                <DialogFooter className="pt-4">
+                  <Button type="submit" className="w-full gap-2">
+                    <Send className="w-4 h-4" /> Broadcast to Team
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
