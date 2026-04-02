@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -22,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { clearSession } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface SidebarProps {
   role: Role;
@@ -62,8 +62,13 @@ export function Sidebar({ role }: SidebarProps) {
   return (
     <div className="flex flex-col h-full bg-white border-r w-64 shadow-sm">
       <div className="p-6 flex items-center gap-3 border-b">
-        <div className="bg-primary p-2 rounded-lg">
-          <LayoutDashboard className="w-5 h-5 text-white" />
+        <div className="relative w-10 h-10 overflow-hidden rounded-lg bg-white p-1">
+          <Image 
+            src="https://www.banasdairy.coop/Content/assets/img/logo/banas_logo2.png" 
+            alt="Banas Logo" 
+            fill 
+            className="object-contain"
+          />
         </div>
         <span className="font-bold text-xl text-primary tracking-tight">WorkNest</span>
       </div>

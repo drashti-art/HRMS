@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -10,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { MOCK_USERS, setSession, Role } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Building2, ShieldCheck, Briefcase, UserCircle, Users } from 'lucide-react';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -56,8 +56,13 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-8">
         <div className="text-center space-y-2">
           <div className="flex justify-center mb-4">
-            <div className="bg-primary p-3 rounded-xl">
-              <Building2 className="w-8 h-8 text-white" />
+            <div className="relative w-24 h-24 overflow-hidden rounded-2xl bg-white shadow-lg p-2">
+              <Image 
+                src="https://www.banasdairy.coop/Content/assets/img/logo/banas_logo2.png" 
+                alt="Banas Logo" 
+                fill 
+                className="object-contain"
+              />
             </div>
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-primary">WorkNest HR</h1>
