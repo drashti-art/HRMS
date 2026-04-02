@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSession, User, clearSession } from '@/lib/auth';
 import { Sidebar } from '@/components/dashboard/Sidebar';
-import { Bell, Search, User as UserIcon, Check, Clock, LogOut, Settings, UserCircle } from 'lucide-react';
+import { Bell, Search, User as UserIcon, Check, Clock, LogOut, Settings, UserCircle, Sparkles, Send, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from '@/lib/utils';
+import { aiHrAssistant } from '@/ai/flows/ai-hr-assistant';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Notification {
   id: string;
@@ -45,28 +47,18 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
     read: false,
     type: 'info',
   },
-  {
-    id: '3',
-    title: 'New Job Opening',
-    message: 'A new Senior Frontend Developer position has been posted.',
-    time: '1d ago',
-    read: true,
-    type: 'info',
-  },
-  {
-    id: '4',
-    title: 'Security Alert',
-    message: 'Unusual login attempt detected on your account from a new device.',
-    time: '2d ago',
-    read: true,
-    type: 'warning',
-  },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>(INITIAL_NOTIFICATIONS);
+  
+  // AI Assistant States
+  const [isAiOpen, setIsAiOpen] = useState(false);
+  const [aiQuery, setAiQuery] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiMessages, setAiMessages] = useState<{role: 'user' | 'ai', content: string}[]>([]);
 
   useEffect(() => {
     const session = getSession();
@@ -76,7 +68,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       setUser(session);
     }
 
-    // Listen for global notifications
     const handleNewNotification = (event: any) => {
       if (event.detail) {
         setNotifications(prev => [event.detail, ...prev]);
@@ -86,6 +77,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     window.addEventListener('add-notification', handleNewNotification);
     return () => window.removeEventListener('add-notification', handleNewNotification);
   }, [router]);
+
+  const handleAiAssistant = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!aiQuery || !user) return;
+
+    const currentQuery = aiQuery;
+    setAiQuery('');
+    setAiMessages(prev => [...prev, { role: 'user', content: currentQuery }]);
+    setAiLoading(true);
+
+    try {
+      const result = await aiHrAssistant({
+        query: currentQuery,
+        userRole: user.role,
+        userName: user.name
+      });
+      setAiMessages(prev => [...prev, { role: 'ai', content: result.answer }]);
+    } catch (error) {
+      setAiMessages(prev => [...prev, { role: 'ai', content: "I'm sorry, I'm having trouble connecting to the system right now. Please try again later." }]);
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -105,7 +119,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!user) return null;
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen bg-background overflow-hidden relative">
       <Sidebar role={user.role} />
       
       <div className="flex-1 flex flex-col min-w-0">
@@ -153,51 +167,37 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   )}
                 </div>
                 <div className="max-h-80 overflow-y-auto">
-                  {notifications.length === 0 ? (
-                    <div className="p-8 text-center text-muted-foreground flex flex-col items-center gap-2">
-                      <Bell className="w-8 h-8 opacity-20" />
-                      <p className="text-xs">No notifications yet</p>
-                    </div>
-                  ) : (
-                    notifications.map((n) => (
-                      <div 
-                        key={n.id} 
-                        className={cn(
-                          "p-4 border-b last:border-none hover:bg-secondary/10 cursor-pointer transition-colors flex gap-3",
-                          !n.read && "bg-accent/5 border-l-4 border-l-accent"
-                        )}
-                        onClick={() => markAsRead(n.id)}
-                      >
-                        <div className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-                          n.type === 'success' && "bg-emerald-100 text-emerald-600",
-                          n.type === 'info' && "bg-blue-100 text-blue-600",
-                          n.type === 'warning' && "bg-amber-100 text-amber-600",
-                        )}>
-                          {n.read ? <Check className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
-                        </div>
-                        <div className="space-y-1">
-                          <p className={cn("text-xs font-bold leading-none", !n.read ? "text-primary" : "text-muted-foreground")}>
-                            {n.title}
-                          </p>
-                          <p className="text-[11px] text-muted-foreground leading-snug">
-                            {n.message}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground/60 pt-1">
-                            {n.time}
-                          </p>
-                        </div>
+                  {notifications.map((n) => (
+                    <div 
+                      key={n.id} 
+                      className={cn(
+                        "p-4 border-b last:border-none hover:bg-secondary/10 cursor-pointer transition-colors flex gap-3",
+                        !n.read && "bg-accent/5 border-l-4 border-l-accent"
+                      )}
+                      onClick={() => markAsRead(n.id)}
+                    >
+                      <div className={cn(
+                        "w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-white",
+                        n.type === 'success' && "bg-emerald-500",
+                        n.type === 'info' && "bg-blue-500",
+                        n.type === 'warning' && "bg-amber-500",
+                      )}>
+                        {n.read ? <Check className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
                       </div>
-                    ))
-                  )}
+                      <div className="space-y-1">
+                        <p className={cn("text-xs font-bold leading-none", !n.read ? "text-primary" : "text-muted-foreground")}>
+                          {n.title}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground leading-snug">
+                          {n.message}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground/60 pt-1">
+                          {n.time}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                {notifications.length > 0 && (
-                  <div className="p-3 border-t bg-secondary/10 text-center">
-                    <Button variant="ghost" size="sm" className="w-full text-[10px] h-6 text-primary font-bold hover:bg-secondary/50">
-                      View Notification Center
-                    </Button>
-                  </div>
-                )}
               </PopoverContent>
             </Popover>
             
@@ -223,36 +223,114 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  className="cursor-pointer gap-2" 
-                  onClick={() => router.push('/dashboard/profile')}
-                >
-                  <UserCircle className="w-4 h-4" />
-                  <span>My Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="cursor-pointer gap-2" 
-                  onClick={() => router.push('/dashboard/settings')}
-                >
-                  <Settings className="w-4 h-4" />
-                  <span>Account Settings</span>
+                <DropdownMenuItem className="cursor-pointer gap-2" onClick={() => router.push('/dashboard/profile')}>
+                  <UserCircle className="w-4 h-4" /> My Profile
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  className="cursor-pointer gap-2 text-destructive focus:text-destructive" 
-                  onClick={handleLogout}
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Logout</span>
+                <DropdownMenuItem className="cursor-pointer gap-2 text-destructive focus:text-destructive" onClick={handleLogout}>
+                  <LogOut className="w-4 h-4" /> Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-8">
+        <main className="flex-1 overflow-y-auto p-8 relative">
           {children}
         </main>
+      </div>
+
+      {/* AI Assistant Floating Interface */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        {isAiOpen && (
+          <div className="w-[380px] h-[500px] bg-white rounded-2xl shadow-2xl border flex flex-col mb-4 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+            <div className="p-4 bg-primary text-white flex justify-between items-center shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-white/20 rounded-lg">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold leading-none">WorkNest AI</h4>
+                  <p className="text-[10px] text-white/70">Always online Assistant</p>
+                </div>
+              </div>
+              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10" onClick={() => setIsAiOpen(false)}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <ScrollArea className="flex-1 p-4">
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="bg-secondary/40 p-3 rounded-2xl rounded-tl-none max-w-[85%]">
+                    <p className="text-sm leading-relaxed">
+                      Hello {user.name}! I'm your WorkNest AI assistant. How can I help you today?
+                    </p>
+                  </div>
+                </div>
+
+                {aiMessages.map((msg, i) => (
+                  <div key={i} className={cn("flex gap-2", msg.role === 'user' && "flex-row-reverse")}>
+                    <div className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+                      msg.role === 'user' ? "bg-primary text-white" : "bg-secondary"
+                    )}>
+                      {msg.role === 'user' ? <UserIcon className="w-4 h-4" /> : <Sparkles className="w-4 h-4 text-primary" />}
+                    </div>
+                    <div className={cn(
+                      "p-3 rounded-2xl max-w-[85%] text-sm leading-relaxed",
+                      msg.role === 'user' 
+                        ? "bg-primary text-white rounded-tr-none" 
+                        : "bg-secondary/40 rounded-tl-none"
+                    )}>
+                      {msg.content}
+                    </div>
+                  </div>
+                ))}
+
+                {aiLoading && (
+                  <div className="flex gap-2">
+                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="bg-secondary/40 p-3 rounded-2xl rounded-tl-none">
+                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+
+            <form onSubmit={handleAiAssistant} className="p-4 border-t shrink-0">
+              <div className="flex gap-2">
+                <Input 
+                  placeholder="Ask anything..." 
+                  className="rounded-full bg-secondary/50 border-none px-4"
+                  value={aiQuery}
+                  onChange={(e) => setAiQuery(e.target.value)}
+                  disabled={aiLoading}
+                />
+                <Button type="submit" size="icon" className="rounded-full shrink-0" disabled={aiLoading || !aiQuery}>
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            </form>
+          </div>
+        )}
+        
+        <Button 
+          size="lg" 
+          className={cn(
+            "rounded-full h-14 w-14 shadow-2xl transition-all duration-300 hover:scale-105",
+            isAiOpen ? "rotate-90 bg-destructive hover:bg-destructive/90" : "bg-primary"
+          )}
+          onClick={() => setIsAiOpen(!isAiOpen)}
+        >
+          {isAiOpen ? <X className="w-6 h-6" /> : <Sparkles className="w-6 h-6" />}
+        </Button>
       </div>
     </div>
   );
