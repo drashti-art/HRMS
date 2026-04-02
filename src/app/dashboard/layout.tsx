@@ -2,13 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSession, User } from '@/lib/auth';
+import { getSession, User, clearSession } from '@/lib/auth';
 import { Sidebar } from '@/components/dashboard/Sidebar';
-import { Bell, Search, User as UserIcon, Check, Clock } from 'lucide-react';
+import { Bell, Search, User as UserIcon, Check, Clock, LogOut, Settings, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from '@/lib/utils';
 
 interface Notification {
@@ -77,6 +85,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const markAsRead = (id: string) => {
     setNotifications(notifications.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  };
+
+  const handleLogout = () => {
+    clearSession();
+    router.push('/login');
   };
 
   if (!user) return null;
@@ -178,17 +191,43 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </PopoverContent>
             </Popover>
             
-            <div className="flex items-center gap-3 pl-4 border-l">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold text-foreground">{user.name}</p>
-                <Badge variant="secondary" className="text-[10px] uppercase font-bold px-1.5 h-4">
-                  {user.role}
-                </Badge>
-              </div>
-              <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:opacity-90 transition-opacity">
-                {user.name.charAt(0)}
-              </div>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="flex items-center gap-3 pl-4 border-l cursor-pointer hover:bg-secondary/20 transition-colors py-1 px-2 rounded-lg">
+                  <div className="text-right hidden sm:block">
+                    <p className="text-sm font-semibold text-foreground leading-none">{user.name}</p>
+                    <Badge variant="secondary" className="text-[9px] uppercase font-bold px-1.5 h-3.5 mt-1">
+                      {user.role}
+                    </Badge>
+                  </div>
+                  <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center text-white font-bold shrink-0 shadow-sm">
+                    {user.name.charAt(0)}
+                  </div>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 mt-1 rounded-xl shadow-xl" align="end">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer gap-2" onClick={() => router.push('/dashboard/profile')}>
+                  <UserCircle className="w-4 h-4" />
+                  <span>My Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer gap-2" onClick={() => router.push('/dashboard/settings')}>
+                  <Settings className="w-4 h-4" />
+                  <span>Account Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer gap-2 text-destructive focus:text-destructive" onClick={handleLogout}>
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
