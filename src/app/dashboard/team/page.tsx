@@ -16,7 +16,9 @@ import {
   MoreVertical,
   CheckCircle2,
   Clock,
-  ShieldAlert
+  ShieldAlert,
+  UserPlus,
+  Plus
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -26,11 +28,30 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
 export default function MyTeamPage() {
   const [manager, setManager] = useState<User | null>(null);
   const [teamMembers, setTeamMembers] = useState<User[]>([]);
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [newMember, setNewMember] = useState({
+    name: '',
+    email: '',
+    designation: ''
+  });
+  const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
@@ -44,6 +65,30 @@ export default function MyTeamPage() {
       setTeamMembers(members);
     }
   }, []);
+
+  const handleAddMember = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manager || !newMember.name || !newMember.email) return;
+
+    const member: User = {
+      id: Math.random().toString(36).substr(2, 9),
+      name: newMember.name,
+      email: newMember.email,
+      role: 'Employee',
+      department: manager.department,
+      designation: newMember.designation || 'Team Member',
+      joiningDate: new Date().toISOString().split('T')[0]
+    };
+
+    setTeamMembers([member, ...teamMembers]);
+    setIsAddMemberOpen(false);
+    setNewMember({ name: '', email: '', designation: '' });
+
+    toast({
+      title: "Team Member Added",
+      description: `${member.name} has been added to the ${manager.department} team.`,
+    });
+  };
 
   if (!manager || (manager.role !== 'Manager' && manager.role !== 'SuperAdmin')) {
     return (
@@ -64,9 +109,62 @@ export default function MyTeamPage() {
           <h1 className="text-3xl font-bold text-primary">My Team</h1>
           <p className="text-muted-foreground">Managing {teamMembers.length} members in the {manager.department} department.</p>
         </div>
-        <Button className="gap-2">
-          <MessageSquare className="w-4 h-4" /> Team Announcement
-        </Button>
+        <div className="flex gap-3">
+          <Dialog open={isAddMemberOpen} onOpenChange={setIsAddMemberOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <UserPlus className="w-4 h-4" /> Add Team Member
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Add Team Member</DialogTitle>
+                <DialogDescription>
+                  Enter details to add a new member to the {manager.department} department.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleAddMember} className="space-y-4 pt-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input 
+                    id="name" 
+                    placeholder="John Doe" 
+                    value={newMember.name}
+                    onChange={(e) => setNewMember({...newMember, name: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="john@worknest.com" 
+                    value={newMember.email}
+                    onChange={(e) => setNewMember({...newMember, email: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="designation">Designation</Label>
+                  <Input 
+                    id="designation" 
+                    placeholder="Software Engineer" 
+                    value={newMember.designation}
+                    onChange={(e) => setNewMember({...newMember, designation: e.target.value})}
+                  />
+                </div>
+                <DialogFooter className="pt-4">
+                  <Button type="submit" className="w-full">Add to Team</Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+          
+          <Button className="gap-2">
+            <MessageSquare className="w-4 h-4" /> Team Announcement
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -204,7 +302,7 @@ export default function MyTeamPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {teamMembers.map((member, i) => (
+            {teamMembers.slice(0, 5).map((member, i) => (
               <div key={i} className="flex items-center justify-between p-3 rounded-lg border bg-secondary/10">
                 <div className="flex items-center gap-3">
                    <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold text-primary">
