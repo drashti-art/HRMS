@@ -3,20 +3,59 @@
 import { useEffect, useState } from 'react';
 import { getSession, User } from '@/lib/auth';
 import { StatsCard } from '@/components/dashboard/StatsCard';
-import { Users, CalendarClock, Briefcase, DollarSign, CheckCircle2, AlertCircle, Sparkles, BrainCircuit, Activity, Heart } from 'lucide-react';
+import { 
+  Users, 
+  CalendarClock, 
+  Briefcase, 
+  DollarSign, 
+  CheckCircle2, 
+  AlertCircle, 
+  Sparkles, 
+  BrainCircuit, 
+  Activity, 
+  Heart,
+  Loader2,
+  LineChart,
+  Target,
+  ShieldCheck,
+  Zap,
+  ChevronRight
+} from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
 
 export default function DashboardOverview() {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
+  
+  // AI Insights States
+  const [isInsightsOpen, setIsInsightsOpen] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
 
   useEffect(() => {
     setUser(getSession());
   }, []);
+
+  const handleExploreInsights = () => {
+    setAnalyzing(true);
+    setIsInsightsOpen(true);
+    
+    // Simulate deep system analysis
+    setTimeout(() => {
+      setAnalyzing(false);
+    }, 2000);
+  };
 
   if (!user) return null;
 
@@ -134,12 +173,105 @@ export default function DashboardOverview() {
               <p className="text-sm">Quarterly Performance Reviews start in 14 days. Ensure all logs are finalized.</p>
             </div>
 
-            <Button className="w-full bg-accent hover:bg-accent/90 text-primary font-bold shadow-lg">
+            <Button 
+              className="w-full bg-accent hover:bg-accent/90 text-primary font-bold shadow-lg"
+              onClick={handleExploreInsights}
+            >
               Explore AI Insights
             </Button>
           </CardContent>
         </Card>
       </div>
+
+      {/* AI Insights Dialog */}
+      <Dialog open={isInsightsOpen} onOpenChange={setIsInsightsOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-2xl">
+              <Sparkles className="w-6 h-6 text-accent" /> Deep Workspace Analysis
+            </DialogTitle>
+            <DialogDescription>
+              Predictive AI insights based on current organizational behavior and historical data.
+            </DialogDescription>
+          </DialogHeader>
+
+          {analyzing ? (
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <Loader2 className="w-12 h-12 text-primary animate-spin" />
+              <div className="text-center">
+                <p className="font-bold text-primary">Scanning System Modules...</p>
+                <p className="text-sm text-muted-foreground italic">Running cross-departmental sentiment analysis</p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-8 py-4 animate-in fade-in duration-700">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-emerald-600 uppercase">Retention Risk</span>
+                    <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                  </div>
+                  <h4 className="text-2xl font-bold text-emerald-700">Extremely Low</h4>
+                  <p className="text-[10px] text-emerald-600/70 mt-1">AI indicates 96% team stability for Q3.</p>
+                </div>
+                <div className="p-4 bg-primary/5 rounded-xl border border-primary/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-primary uppercase">Engagement Trend</span>
+                    <LineChart className="w-4 h-4 text-primary" />
+                  </div>
+                  <h4 className="text-2xl font-bold text-primary">+18.4%</h4>
+                  <p className="text-[10px] text-primary/70 mt-1">Growth in active internal communications.</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold text-muted-foreground uppercase flex items-center gap-2">
+                  <Target className="w-4 h-4" /> Priority Areas for {user.role}
+                </h3>
+                
+                <div className="space-y-3">
+                  <div className="p-3 border rounded-xl bg-card space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Team Morale optimization</span>
+                      <Badge className="bg-accent text-primary">Active</Badge>
+                    </div>
+                    <Progress value={85} className="h-1.5" />
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      AI recommends scheduling a department-wide wellness workshop based on recent workload spikes.
+                    </p>
+                  </div>
+
+                  <div className="p-3 border rounded-xl bg-card space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Resource Utilization</span>
+                      <Badge variant="outline" className="text-emerald-600 border-emerald-200">Optimal</Badge>
+                    </div>
+                    <Progress value={92} className="h-1.5" />
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Departmental budget allocation is 92% efficient. No major reallocation needed this cycle.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="bg-primary p-6 rounded-2xl text-white relative overflow-hidden">
+                <Zap className="absolute -right-4 -bottom-4 w-32 h-32 text-white/5" />
+                <h4 className="text-lg font-bold flex items-center gap-2 mb-2">
+                  <Zap className="w-5 h-5 text-accent" /> Proactive AI Action
+                </h4>
+                <p className="text-sm text-white/80 leading-relaxed mb-4">
+                  "Based on the current trajectory, the {user.department} team is likely to meet all quarterly OKRs 12 days ahead of schedule. We recommend early-stage planning for Q4 initiatives."
+                </p>
+                <Button variant="secondary" className="w-full gap-2 font-bold" onClick={() => setIsInsightsOpen(false)}>
+                  Acknowledge & Sync <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
