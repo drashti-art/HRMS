@@ -16,7 +16,8 @@ import {
   AlertCircle,
   TrendingUp,
   FileText,
-  Loader2
+  Loader2,
+  RefreshCcw
 } from 'lucide-react';
 import { getSession, User } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
@@ -29,6 +30,7 @@ const MOCK_PAYROLL_DATA = [
   { id: 'p4', name: 'Oscar Martinez', dept: 'Finance', base: 5500, bonus: 500, deductions: 550, status: 'Paid', date: 'March 2024' },
   { id: 'p5', name: 'Angela Martin', dept: 'Finance', base: 5200, bonus: 400, deductions: 520, status: 'Paid', date: 'March 2024' },
   { id: 'p6', name: 'Sarah Connor', dept: 'Executive', base: 12000, bonus: 5000, deductions: 1200, status: 'Paid', date: 'March 2024' },
+  { id: 'p7', name: 'Kevin Malone', dept: 'Finance', base: 4000, bonus: 200, deductions: 400, status: 'Processing', date: 'March 2024' },
 ];
 
 export default function PayrollPage() {
@@ -54,16 +56,64 @@ export default function PayrollPage() {
     return matchesRole && matchesSearch;
   });
 
-  const handleProcessPayroll = () => {
-    setProcessing(true);
-    setTimeout(() => {
-      setPayrollList(prev => prev.map(p => ({ ...p, status: 'Paid' })));
-      setProcessing(false);
+  const pendingCount = payrollList.filter(p => p.status === 'Processing').length;
+
+  const handleProcessPayroll = async () => {
+    if (pendingCount === 0) {
       toast({
-        title: "Payroll Processed",
-        description: "All pending salaries for the current month have been disbursed.",
+        title: "Nothing to Process",
+        description: "All employee salaries for this month have already been paid.",
       });
-    }, 2000);
+      return;
+    }
+
+    setProcessing(true);
+    
+    // Step 1: Verification
+    toast({
+      title: "Step 1/3: Verifying Records",
+      description: "Checking bank details and tax compliance for all employees...",
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    // Step 2: Calculation
+    toast({
+      title: "Step 2/3: Calculating Totals",
+      description: "Finalizing deductions and bonus allocations...",
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    // Step 3: Disbursement
+    toast({
+      title: "Step 3/3: Disbursing Funds",
+      description: "Initiating secure bank transfers to employee accounts...",
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    // Finalize
+    setPayrollList(prev => prev.map(p => ({ ...p, status: 'Paid' })));
+    setProcessing(false);
+    
+    toast({
+      title: "Payroll Successfully Processed",
+      description: `Salaries for ${pendingCount} employees have been disbursed.`,
+    });
+
+    // Notify the system (optional: for activities page/dashboard)
+    const event = new CustomEvent('add-notification', {
+      detail: {
+        id: Math.random().toString(36).substr(2, 9),
+        title: 'Payroll Disbursed',
+        message: `Monthly payroll for March 2024 has been completed by ${user.name}.`,
+        time: 'Just now',
+        read: false,
+        type: 'success'
+      }
+    });
+    window.dispatchEvent(event);
   };
 
   const downloadPayslip = (record: typeof MOCK_PAYROLL_DATA[0]) => {
@@ -164,9 +214,22 @@ export default function PayrollPage() {
           </p>
         </div>
         {isAdminOrHR && (
-          <Button className="gap-2 shadow-lg" onClick={handleProcessPayroll} disabled={processing}>
-            {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
-            Process Monthly Payroll
+          <Button 
+            className={cn("gap-2 shadow-lg transition-all", processing ? "opacity-90" : "hover:scale-105")} 
+            onClick={handleProcessPayroll} 
+            disabled={processing}
+          >
+            {processing ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <CreditCard className="w-4 h-4" />
+                Process Monthly Payroll
+              </>
+            )}
           </Button>
         )}
       </div>
@@ -197,7 +260,7 @@ export default function PayrollPage() {
         <Card className="dashboard-card border-l-4 border-l-amber-500">
           <CardHeader className="pb-2">
             <p className="text-sm font-medium text-muted-foreground uppercase">Pending Payments</p>
-            <CardTitle className="text-2xl">{payrollList.filter(p => p.status === 'Processing').length}</CardTitle>
+            <CardTitle className="text-2xl">{pendingCount}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">Awaiting approval</p>
