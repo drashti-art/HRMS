@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,9 +14,11 @@ import {
   Clock, 
   Filter,
   Calendar,
-  User
+  User as UserIcon
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { getSession, User } from '@/lib/auth';
+import { cn } from '@/lib/utils';
 
 const MOCK_LEAVES = [
   { id: '1', employee: "John Smith", type: "Annual Leave", start: "2024-03-20", end: "2024-03-25", days: 5, status: "Pending", reason: "Family vacation" },
@@ -31,6 +33,11 @@ export default function LeavesPage() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('pending');
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    setUser(getSession());
+  }, []);
 
   const filteredLeaves = MOCK_LEAVES.filter(leave => {
     const matchesSearch = leave.employee.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -46,6 +53,8 @@ export default function LeavesPage() {
     });
   };
 
+  const isAdminOrSuperAdmin = user?.role === 'SuperAdmin' || user?.role === 'Admin';
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex justify-between items-center">
@@ -58,47 +67,49 @@ export default function LeavesPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-primary/5 border-primary/20">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-primary/10 rounded-full">
-                <Clock className="w-6 h-6 text-primary" />
+      {!isAdminOrSuperAdmin && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="bg-primary/5 border-primary/20">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-primary/10 rounded-full">
+                  <Clock className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Pending</p>
+                  <h3 className="text-2xl font-bold">14</h3>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                <h3 className="text-2xl font-bold">14</h3>
+            </CardContent>
+          </Card>
+          <Card className="bg-emerald-50 border-emerald-200">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-emerald-100 rounded-full">
+                  <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Approved</p>
+                  <h3 className="text-2xl font-bold text-emerald-700">85</h3>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-emerald-50 border-emerald-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-emerald-100 rounded-full">
-                <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+            </CardContent>
+          </Card>
+          <Card className="bg-rose-50 border-rose-200">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-rose-100 rounded-full">
+                  <XCircle className="w-6 h-6 text-rose-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Rejected</p>
+                  <h3 className="text-2xl font-bold text-rose-700">12</h3>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Approved</p>
-                <h3 className="text-2xl font-bold text-emerald-700">85</h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-rose-50 border-rose-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-rose-100 rounded-full">
-                <XCircle className="w-6 h-6 text-rose-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Rejected</p>
-                <h3 className="text-2xl font-bold text-rose-700">12</h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <Card className="dashboard-card border-none shadow-lg">
         <CardHeader className="pb-0">
@@ -123,95 +134,93 @@ export default function LeavesPage() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader className="bg-secondary/20">
-              <TableRow>
-                <TableHead className="font-bold">Employee</TableHead>
-                <TableHead className="font-bold">Type</TableHead>
-                <TableHead className="font-bold">Duration</TableHead>
-                <TableHead className="font-bold">Days</TableHead>
-                <TableHead className="font-bold">Status</TableHead>
-                <TableHead className="text-right font-bold">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredLeaves.length > 0 ? (
-                filteredLeaves.map((leave) => (
-                  <TableRow key={leave.id} className="hover:bg-accent/5 transition-colors">
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
-                          {leave.employee.charAt(0)}
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-secondary/20">
+                <TableRow>
+                  <TableHead className="font-bold">Employee</TableHead>
+                  <TableHead className="font-bold">Type</TableHead>
+                  <TableHead className="font-bold">Duration</TableHead>
+                  <TableHead className="font-bold">Days</TableHead>
+                  <TableHead className="font-bold">Status</TableHead>
+                  <TableHead className="text-right font-bold">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredLeaves.length > 0 ? (
+                  filteredLeaves.map((leave) => (
+                    <TableRow key={leave.id} className="hover:bg-accent/5 transition-colors">
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+                            {leave.employee.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-medium">{leave.employee}</p>
+                            <p className="text-xs text-muted-foreground">{leave.reason}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium">{leave.employee}</p>
-                          <p className="text-xs text-muted-foreground">{leave.reason}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{leave.type}</Badge>
-                    </TableCell>
-                    <TableCell className="text-sm font-mono text-muted-foreground">
-                      {leave.start} to {leave.end}
-                    </TableCell>
-                    <TableCell className="font-semibold">{leave.days}</TableCell>
-                    <TableCell>
-                      <Badge 
-                        variant="outline" 
-                        className={cn(
-                          "font-medium",
-                          leave.status === 'Pending' && "bg-amber-50 text-amber-700 border-amber-200",
-                          leave.status === 'Approved' && "bg-emerald-50 text-emerald-700 border-emerald-200",
-                          leave.status === 'Rejected' && "bg-rose-50 text-rose-700 border-rose-200"
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">{leave.type}</Badge>
+                      </TableCell>
+                      <TableCell className="text-sm font-mono text-muted-foreground">
+                        {leave.start} to {leave.end}
+                      </TableCell>
+                      <TableCell className="font-semibold">{leave.days}</TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant="outline" 
+                          className={cn(
+                            "font-medium",
+                            leave.status === 'Pending' && "bg-amber-50 text-amber-700 border-amber-200",
+                            leave.status === 'Approved' && "bg-emerald-50 text-emerald-700 border-emerald-200",
+                            leave.status === 'Rejected' && "bg-rose-50 text-rose-700 border-rose-200"
+                          )}
+                        >
+                          {leave.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {leave.status === 'Pending' ? (
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                              onClick={() => handleAction(leave.id, 'Approved')}
+                            >
+                              <CheckCircle2 className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                              onClick={() => handleAction(leave.id, 'Rejected')}
+                            >
+                              <XCircle className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button variant="ghost" size="sm" disabled>
+                            Finalized
+                          </Button>
                         )}
-                      >
-                        {leave.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {leave.status === 'Pending' ? (
-                        <div className="flex justify-end gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
-                            onClick={() => handleAction(leave.id, 'Approved')}
-                          >
-                            <CheckCircle2 className="w-4 h-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
-                            onClick={() => handleAction(leave.id, 'Rejected')}
-                          >
-                            <XCircle className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button variant="ghost" size="sm" disabled>
-                          Finalized
-                        </Button>
-                      )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                      No leave requests found.
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
-                    No leave requests found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
   );
-}
-
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
 }
