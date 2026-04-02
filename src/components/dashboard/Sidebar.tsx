@@ -61,7 +61,7 @@ export function Sidebar({ role }: SidebarProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white border-r w-64 shadow-sm">
+    <div className="flex flex-col h-full bg-card border-r w-64 shadow-sm">
       <div className="p-6 flex items-center gap-3 border-b">
         <div className="relative w-10 h-10 overflow-hidden rounded-lg bg-white p-1">
           <Image 
@@ -82,13 +82,13 @@ export function Sidebar({ role }: SidebarProps) {
             className={cn(
               "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors group",
               pathname === item.href 
-                ? "bg-primary text-white" 
+                ? "bg-primary text-primary-foreground" 
                 : "text-muted-foreground hover:bg-secondary hover:text-primary"
             )}
           >
             <item.icon className={cn(
               "w-5 h-5",
-              pathname === item.href ? "text-white" : "text-muted-foreground group-hover:text-primary"
+              pathname === item.href ? "text-primary-foreground" : "text-muted-foreground group-hover:text-primary"
             )} />
             {item.title}
           </Link>

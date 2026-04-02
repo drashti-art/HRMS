@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSession, User, clearSession } from '@/lib/auth';
 import { Sidebar } from '@/components/dashboard/Sidebar';
-import { Bell, Search, User as UserIcon, Check, Clock, LogOut, Settings, UserCircle, Sparkles, Send, X, Loader2 } from 'lucide-react';
+import { Bell, Search, User as UserIcon, Check, Clock, LogOut, Settings, UserCircle, Sparkles, Send, X, Loader2, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,7 @@ import {
 import { cn } from '@/lib/utils';
 import { aiHrAssistant } from '@/ai/flows/ai-hr-assistant';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useTheme } from 'next-themes';
 
 interface Notification {
   id: string;
@@ -52,6 +53,7 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
   const [user, setUser] = useState<User | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>(INITIAL_NOTIFICATIONS);
   
@@ -124,7 +126,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <Sidebar role={user.role} />
       
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 border-b bg-white px-8 flex items-center justify-between shadow-sm z-10">
+        <header className="h-16 border-b bg-card px-8 flex items-center justify-between shadow-sm z-10">
           <div className="flex-1 max-w-md">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -137,17 +139,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
 
           <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hover:bg-secondary/50 transition-colors"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            >
+              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-muted-foreground" />
+              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-muted-foreground" />
+              <span className="sr-only">Toggle theme</span>
+            </Button>
+
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative hover:bg-secondary/50 transition-colors">
                   <Bell className="w-5 h-5 text-muted-foreground" />
                   {unreadCount > 0 && (
-                    <span className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-white animate-pulse" />
+                    <span className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-card animate-pulse" />
                   )}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-80 p-0 mr-4 mt-2 shadow-2xl border-none rounded-xl overflow-hidden" align="end">
-                <div className="p-4 bg-primary text-white flex justify-between items-center">
+                <div className="p-4 bg-primary text-primary-foreground flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <h3 className="font-bold text-sm">Notifications</h3>
                     {unreadCount > 0 && (
@@ -167,7 +180,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </Button>
                   )}
                 </div>
-                <div className="max-h-80 overflow-y-auto">
+                <div className="max-h-80 overflow-y-auto bg-card">
                   {notifications.map((n) => (
                     <div 
                       key={n.id} 
@@ -211,7 +224,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       {user.role}
                     </Badge>
                   </div>
-                  <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center text-white font-bold shrink-0 shadow-sm">
+                  <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold shrink-0 shadow-sm">
                     {user.name.charAt(0)}
                   </div>
                 </div>
@@ -244,8 +257,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* AI Assistant Floating Interface */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
         {isAiOpen && (
-          <div className="w-[380px] h-[500px] bg-white rounded-2xl shadow-2xl border flex flex-col mb-4 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
-            <div className="p-4 bg-primary text-white flex justify-between items-center shrink-0">
+          <div className="w-[380px] h-[500px] bg-card rounded-2xl shadow-2xl border flex flex-col mb-4 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+            <div className="p-4 bg-primary text-primary-foreground flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 bg-white/20 rounded-lg">
                   <Sparkles className="w-4 h-4" />
@@ -260,7 +273,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Button>
             </div>
 
-            <ScrollArea className="flex-1 p-4">
+            <ScrollArea className="flex-1 p-4 bg-background/50">
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
@@ -277,15 +290,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <div key={i} className={cn("flex gap-2", msg.role === 'user' && "flex-row-reverse")}>
                     <div className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-                      msg.role === 'user' ? "bg-primary text-white" : "bg-secondary"
+                      msg.role === 'user' ? "bg-primary text-primary-foreground" : "bg-secondary"
                     )}>
                       {msg.role === 'user' ? <UserIcon className="w-4 h-4" /> : <Sparkles className="w-4 h-4 text-primary" />}
                     </div>
                     <div className={cn(
                       "p-3 rounded-2xl max-w-[85%] text-sm leading-relaxed",
                       msg.role === 'user' 
-                        ? "bg-primary text-white rounded-tr-none" 
-                        : "bg-secondary/40 rounded-tl-none"
+                        ? "bg-primary text-primary-foreground rounded-tr-none" 
+                        : "bg-secondary/40 rounded-tl-none text-foreground"
                     )}>
                       {msg.content}
                     </div>
@@ -305,7 +318,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             </ScrollArea>
 
-            <form onSubmit={handleAiAssistant} className="p-4 border-t shrink-0">
+            <form onSubmit={handleAiAssistant} className="p-4 border-t shrink-0 bg-card">
               <div className="flex gap-2">
                 <Input 
                   placeholder="Ask anything..." 
@@ -326,7 +339,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           size="lg" 
           className={cn(
             "rounded-full h-14 w-14 shadow-2xl transition-all duration-300 hover:scale-105",
-            isAiOpen ? "rotate-90 bg-destructive hover:bg-destructive/90" : "bg-primary"
+            isAiOpen ? "rotate-90 bg-destructive hover:bg-destructive/90 text-destructive-foreground" : "bg-primary text-primary-foreground"
           )}
           onClick={() => setIsAiOpen(!isAiOpen)}
         >
