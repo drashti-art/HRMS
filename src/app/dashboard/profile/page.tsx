@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { getSession, User } from '@/lib/auth';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,12 +16,16 @@ import {
   Calendar, 
   Shield, 
   Edit3,
-  Camera
+  Camera,
+  Image as ImageIcon
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: '',
     department: '',
@@ -58,6 +62,34 @@ export default function ProfilePage() {
     });
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          variant: "destructive",
+          title: "File too large",
+          description: "Please select an image smaller than 2MB.",
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result as string);
+        toast({
+          title: "Photo Uploaded",
+          description: "Your profile picture has been updated locally.",
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   if (!user) return null;
 
   return (
@@ -72,10 +104,32 @@ export default function ProfilePage() {
           <div className="h-32 bg-primary relative">
             <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
               <div className="relative">
-                <div className="w-24 h-24 rounded-full bg-white border-4 border-white shadow-lg flex items-center justify-center text-primary text-3xl font-bold overflow-hidden">
-                  {user.name.charAt(0)}
+                <div className="w-24 h-24 rounded-full bg-white border-4 border-white shadow-lg flex items-center justify-center text-primary text-3xl font-bold overflow-hidden relative">
+                  {profileImage ? (
+                    <Image 
+                      src={profileImage} 
+                      alt="Profile" 
+                      fill 
+                      className="object-cover"
+                    />
+                  ) : (
+                    user.name.charAt(0)
+                  )}
                 </div>
-                <Button size="icon" variant="secondary" className="absolute bottom-0 right-0 rounded-full w-8 h-8 shadow-md">
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  accept="image/*" 
+                  onChange={handleImageChange}
+                />
+                <Button 
+                  size="icon" 
+                  variant="secondary" 
+                  className="absolute bottom-0 right-0 rounded-full w-8 h-8 shadow-md hover:scale-110 transition-transform"
+                  onClick={triggerFileInput}
+                  type="button"
+                >
                   <Camera className="w-4 h-4" />
                 </Button>
               </div>
