@@ -36,7 +36,7 @@ interface AttendanceRecord {
   date: string;
   clockIn: string;
   clockOut: string | null;
-  status: 'On Time' | 'Late' | 'Absent';
+  status: 'On Time' | 'Late' | 'Absent' | 'Active';
   totalHours: string;
   location?: string;
   device?: string;
@@ -54,7 +54,7 @@ export default function AttendancePage() {
   const { toast } = useToast();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isClockedIn, setIsClockedIn] = useState(false);
-  const [clockInTime, setClockInTime] = useState<string | null>(null);
+  const [activeRecordId, setActiveRecordId] = useState<string | null>(null);
   const [attendanceHistory, setAttendanceHistory] = useState<AttendanceRecord[]>(MOCK_HISTORY);
   const [user, setUser] = useState<any>(null);
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
@@ -67,34 +67,51 @@ export default function AttendancePage() {
   }, []);
 
   const handleClockAction = () => {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const dateStr = now.toISOString().split('T')[0];
+
     if (!isClockedIn) {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      // Clocking In
+      const newRecordId = Math.random().toString(36).substr(2, 9);
+      const newRecord: AttendanceRecord = {
+        id: newRecordId,
+        employeeName: user?.name || 'Current User',
+        date: dateStr,
+        clockIn: timeStr,
+        clockOut: null,
+        status: 'Active',
+        totalHours: 'Calculating...',
+        location: 'Office - HQ',
+        device: 'Web App'
+      };
+
       setIsClockedIn(true);
-      setClockInTime(timeStr);
+      setActiveRecordId(newRecordId);
+      setAttendanceHistory([newRecord, ...attendanceHistory]);
+      
       toast({
         title: "Clocked In",
         description: `Successfully clocked in at ${timeStr}. Have a great day!`,
       });
     } else {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      // Clocking Out
       setIsClockedIn(false);
       
-      const newRecord: AttendanceRecord = {
-        id: Math.random().toString(36).substr(2, 9),
-        employeeName: user?.name || 'Current User',
-        date: now.toISOString().split('T')[0],
-        clockIn: clockInTime || '--',
-        clockOut: timeStr,
-        status: 'On Time',
-        totalHours: '8h 30m',
-        location: 'Office - HQ',
-        device: 'Web App'
-      };
+      setAttendanceHistory(prev => prev.map(record => {
+        if (record.id === activeRecordId) {
+          return {
+            ...record,
+            clockOut: timeStr,
+            status: 'On Time', // Default status for simulation
+            totalHours: '8h 30m' // Mocked duration
+          };
+        }
+        return record;
+      }));
       
-      setAttendanceHistory([newRecord, ...attendanceHistory]);
-      setClockInTime(null);
+      setActiveRecordId(null);
+      
       toast({
         title: "Clocked Out",
         description: `Successfully clocked out at ${timeStr}. See you tomorrow!`,
@@ -141,7 +158,7 @@ export default function AttendancePage() {
                 {isClockedIn ? "Working..." : "Not Clocked In"}
               </h3>
               <p className="text-white/70 text-sm mt-1">
-                {isClockedIn ? `Since ${clockInTime}` : "Ready to start your day?"}
+                {isClockedIn ? `Shift active for ${user?.name}` : "Ready to start your day?"}
               </p>
             </div>
 
@@ -256,7 +273,7 @@ export default function AttendancePage() {
             </TableHeader>
             <TableBody>
               {attendanceHistory.map((record) => (
-                <TableRow key={record.id} className="hover:bg-accent/5 transition-colors">
+                <TableRow key={record.id} className={cn("hover:bg-accent/5 transition-colors", record.status === 'Active' && "bg-primary/5")}>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold text-primary">
@@ -267,7 +284,9 @@ export default function AttendancePage() {
                   </TableCell>
                   <TableCell className="text-sm">{record.date}</TableCell>
                   <TableCell className="text-sm">{record.clockIn}</TableCell>
-                  <TableCell className="text-sm">{record.clockOut || '--'}</TableCell>
+                  <TableCell className="text-sm">
+                    {record.clockOut || (record.status === 'Active' ? <span className="text-primary animate-pulse font-medium">Working...</span> : '--')}
+                  </TableCell>
                   <TableCell className="text-sm">{record.totalHours}</TableCell>
                   <TableCell>
                     <Badge 
@@ -276,7 +295,8 @@ export default function AttendancePage() {
                         "font-medium text-[10px] h-5",
                         record.status === 'On Time' && "bg-emerald-50 text-emerald-700 border-emerald-200",
                         record.status === 'Late' && "bg-amber-50 text-amber-700 border-amber-200",
-                        record.status === 'Absent' && "bg-rose-50 text-rose-700 border-rose-200"
+                        record.status === 'Absent' && "bg-rose-50 text-rose-700 border-rose-200",
+                        record.status === 'Active' && "bg-primary/10 text-primary border-primary/20"
                       )}
                     >
                       {record.status}
@@ -339,7 +359,7 @@ export default function AttendancePage() {
                   <p className="text-xs font-medium text-muted-foreground uppercase">Clock Out</p>
                   <div className="flex items-center gap-2 text-rose-600">
                     <LogOut className="w-4 h-4" />
-                    <span className="font-bold text-sm">{selectedRecord.clockOut || 'N/A'}</span>
+                    <span className="font-bold text-sm">{selectedRecord.clockOut || 'Working...'}</span>
                   </div>
                 </div>
               </div>
