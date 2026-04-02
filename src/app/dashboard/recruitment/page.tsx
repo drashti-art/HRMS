@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -24,7 +23,10 @@ import {
   ClipboardCheck,
   ChevronLeft,
   User,
-  MoreVertical
+  MoreVertical,
+  Mail,
+  MapPin,
+  ExternalLink
 } from 'lucide-react';
 import { summarizeResume, ResumeSummarizerOutput } from '@/ai/flows/ai-resume-summarizer';
 import { aiJobDescriptionGenerator } from '@/ai/flows/ai-job-description-generator';
@@ -39,6 +41,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface JobListing {
   id: string;
@@ -96,6 +99,8 @@ export default function RecruitmentPage() {
   const [newJob, setNewJob] = useState({ title: '', dept: '', status: 'Active' as JobListing['status'] });
 
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [viewingApplicant, setViewingApplicant] = useState<Applicant | null>(null);
+  const [isResumeOpen, setIsResumeOpen] = useState(false);
 
   const handleSummarize = async () => {
     if (!resumeText) return;
@@ -166,6 +171,11 @@ export default function RecruitmentPage() {
     setJobListings([listing, ...jobListings]);
     toast({ title: "Saved to Listings", description: "The generated JD has been added as a new job opening." });
     setActiveTab('listings');
+  };
+
+  const handleViewResume = (applicant: Applicant) => {
+    setViewingApplicant(applicant);
+    setIsResumeOpen(true);
   };
 
   const selectedJob = jobListings.find(j => j.id === selectedJobId);
@@ -459,7 +469,12 @@ export default function RecruitmentPage() {
                               {applicant.appliedDate}
                             </TableCell>
                             <TableCell className="text-right">
-                              <Button variant="ghost" size="sm" className="text-xs h-8 text-primary">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-xs h-8 text-primary"
+                                onClick={() => handleViewResume(applicant)}
+                              >
                                 View Resume
                               </Button>
                             </TableCell>
@@ -519,6 +534,127 @@ export default function RecruitmentPage() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Resume View Dialog */}
+      <Dialog open={isResumeOpen} onOpenChange={setIsResumeOpen}>
+        <DialogContent className="sm:max-w-[800px] h-[90vh] p-0 flex flex-col gap-0 overflow-hidden">
+          <DialogHeader className="p-6 border-b shrink-0">
+            <div className="flex justify-between items-center">
+              <div>
+                <DialogTitle className="text-2xl font-bold">{viewingApplicant?.name}</DialogTitle>
+                <DialogDescription className="flex items-center gap-2 mt-1">
+                  <Mail className="w-3 h-3" /> {viewingApplicant?.email} • Applied on {viewingApplicant?.appliedDate}
+                </DialogDescription>
+              </div>
+              <Badge variant="outline" className="text-xs font-bold bg-primary/5 text-primary border-primary/20">
+                Match Score: {viewingApplicant?.score}%
+              </Badge>
+            </div>
+          </DialogHeader>
+          
+          <ScrollArea className="flex-1 p-8">
+            <div className="max-w-3xl mx-auto space-y-10 pb-8">
+              {/* Contact Information */}
+              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" /> New York, NY
+                </div>
+                <div className="flex items-center gap-2">
+                  <ExternalLink className="w-4 h-4" /> linkedin.com/in/{viewingApplicant?.name.toLowerCase().replace(' ', '')}
+                </div>
+              </div>
+
+              {/* Summary */}
+              <section className="space-y-3">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-primary">Professional Summary</h3>
+                <p className="text-base leading-relaxed text-foreground/80">
+                  Dedicated professional with over 8 years of experience in specialized fields. Proven track record of delivering high-quality results in fast-paced environments. Expert in technical implementation, team leadership, and strategic planning.
+                </p>
+              </section>
+
+              <Separator />
+
+              {/* Experience */}
+              <section className="space-y-6">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-primary">Work Experience</h3>
+                
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-bold text-lg">Senior Specialist</h4>
+                      <span className="text-sm font-medium text-muted-foreground">Jan 2020 – Present</span>
+                    </div>
+                    <p className="text-accent font-semibold">TechCorp Global Solutions</p>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-2 mt-2">
+                      <li>Led a team of 15 developers to successfully launch major organizational infrastructure projects.</li>
+                      <li>Implemented automated testing protocols reducing system errors by 40%.</li>
+                      <li>Optimized cloud architecture resulting in a 25% decrease in operational costs.</li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-bold text-lg">Associate Analyst</h4>
+                      <span className="text-sm font-medium text-muted-foreground">Jun 2016 – Dec 2019</span>
+                    </div>
+                    <p className="text-accent font-semibold">Innovative Systems Inc.</p>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-2 mt-2">
+                      <li>Collaborated with cross-functional teams to identify and resolve critical business bottlenecks.</li>
+                      <li>Developed internal tools that increased department efficiency by 15%.</li>
+                      <li>Conducted quarterly market analysis reports for the executive board.</li>
+                    </ul>
+                  </div>
+                </div>
+              </section>
+
+              <Separator />
+
+              {/* Education */}
+              <section className="space-y-4">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-primary">Education</h3>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-bold">Master of Science in Business Technology</h4>
+                    <span className="text-sm text-muted-foreground">2016</span>
+                  </div>
+                  <p className="text-sm">State University of Excellence</p>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-bold">Bachelor of Science in Computer Engineering</h4>
+                    <span className="text-sm text-muted-foreground">2014</span>
+                  </div>
+                  <p className="text-sm">Technical Institute of Technology</p>
+                </div>
+              </section>
+
+              {/* Skills */}
+              <section className="space-y-4">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-primary">Skills & Expertise</h3>
+                <div className="flex flex-wrap gap-2">
+                  {['Project Management', 'Cloud Architecture', 'TypeScript', 'React', 'Strategic Planning', 'Agile Methodology', 'Team Leadership', 'Python', 'SQL', 'Kubernetes'].map((skill, i) => (
+                    <Badge key={i} variant="secondary" className="px-3 py-1">{skill}</Badge>
+                  ))}
+                </div>
+              </section>
+            </div>
+          </ScrollArea>
+
+          <DialogFooter className="p-4 border-t bg-secondary/10 shrink-0">
+            <div className="flex justify-between w-full">
+              <Button variant="outline" onClick={() => setIsResumeOpen(false)}>Close Preview</Button>
+              <div className="flex gap-2">
+                <Button variant="secondary" className="gap-2">
+                  <FileText className="w-4 h-4" /> Download PDF
+                </Button>
+                <Button className="gap-2">
+                  Schedule Interview
+                </Button>
+              </div>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
