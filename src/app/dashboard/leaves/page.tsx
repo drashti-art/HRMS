@@ -250,7 +250,6 @@ export default function LeavesPage() {
                 <TabsTrigger value="pending">Pending</TabsTrigger>
                 <TabsTrigger value="approved">Approved</TabsTrigger>
                 <TabsTrigger value="rejected">Rejected</TabsTrigger>
-                <TabsTrigger value="all">All Requests</TabsTrigger>
               </TabsList>
             </Tabs>
             <div className="relative w-full md:w-64">
