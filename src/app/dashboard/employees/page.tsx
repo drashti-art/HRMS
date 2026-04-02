@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -99,16 +98,77 @@ export default function EmployeesPage() {
 
   const handleExport = () => {
     toast({
-      title: "Exporting Data",
-      description: "Preparing employee records for download... (CSV)",
+      title: "Exporting PDF",
+      description: "Preparing employee records for PDF download...",
     });
     
     setTimeout(() => {
-      toast({
-        title: "Export Complete",
-        description: `${filteredEmployees.length} records exported successfully.`,
-      });
-    }, 1500);
+      const printContent = `
+        <html>
+          <head>
+            <title>Employee Directory - WorkNest HR</title>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 40px; color: #333; }
+              .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #2E2E6B; padding-bottom: 20px; margin-bottom: 30px; }
+              .logo-text { font-size: 24px; font-weight: bold; color: #2E2E6B; }
+              .title { font-size: 18px; color: #666; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              th { background-color: #f8f9fa; text-align: left; padding: 12px; border-bottom: 1px solid #dee2e6; color: #2E2E6B; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; }
+              td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; }
+              .meta { font-size: 10px; color: #999; margin-top: 40px; text-align: center; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <div class="logo-text">WorkNest HR</div>
+              <div class="title">Employee Directory Report</div>
+            </div>
+            <p>Generated on: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+            <p>Total Records: ${filteredEmployees.length}</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Full Name</th>
+                  <th>Email</th>
+                  <th>Department</th>
+                  <th>Designation</th>
+                  <th>Joining Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filteredEmployees.map(emp => `
+                  <tr>
+                    <td style="font-weight: 600;">${emp.name}</td>
+                    <td>${emp.email}</td>
+                    <td>${emp.department}</td>
+                    <td>${emp.designation}</td>
+                    <td style="font-family: monospace;">${emp.joiningDate}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            <div class="meta">
+              WorkNest HR Management System • Confidential Organizational Document
+            </div>
+          </body>
+        </html>
+      `;
+      
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+        
+        // Give browser a moment to render content before printing
+        setTimeout(() => {
+          printWindow.print();
+          toast({
+            title: "Export Complete",
+            description: `${filteredEmployees.length} records exported to PDF successfully.`,
+          });
+        }, 500);
+      }
+    }, 1200);
   };
 
   const handleAddEmployee = (e: React.FormEvent) => {
@@ -155,7 +215,7 @@ export default function EmployeesPage() {
         </div>
         <div className="flex gap-3">
           <Button variant="outline" className="gap-2" onClick={handleExport}>
-            <Download className="w-4 h-4" /> Export
+            <Download className="w-4 h-4" /> Export PDF
           </Button>
           
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
