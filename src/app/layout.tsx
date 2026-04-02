@@ -4,8 +4,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Banas Dairy HR | Modern HRMS',
-  description: 'Full Stack Human Resource Management System with AI tools for Banas Dairy',
+  title: 'Banas Dairy HR | Asia\'s Largest Dairy HRMS',
+  description: 'Full Stack Human Resource Management System with AI tools for Banaskantha District Co-operative Milk Producers\' Union Ltd.',
 };
 
 export default function RootLayout({

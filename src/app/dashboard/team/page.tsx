@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -140,7 +141,7 @@ export default function MyTeamPage() {
     });
     
     setTimeout(() => {
-      window.location.href = `mailto:${member.email}?subject=Message from your Manager`;
+      window.location.href = `mailto:${member.email}?subject=Official Communication from Banas Dairy Manager`;
     }, 500);
   };
 
@@ -152,7 +153,7 @@ export default function MyTeamPage() {
     const event = new CustomEvent('add-notification', {
       detail: {
         id: Math.random().toString(36).substr(2, 9),
-        title: `Team Announcement: ${announcement.title}`,
+        title: `Banas Dairy Announcement: ${announcement.title}`,
         message: announcement.content,
         time: 'Just now',
         read: false,
@@ -176,7 +177,7 @@ export default function MyTeamPage() {
         <ShieldAlert className="w-12 h-12 text-destructive opacity-20" />
         <h2 className="text-xl font-bold">Access Restricted</h2>
         <p className="text-muted-foreground text-center max-w-sm">
-          This dashboard is reserved for Managers to view their reporting team members.
+          This dashboard is reserved for Managers to view their reporting team members at Banas Dairy.
         </p>
       </div>
     );
@@ -219,7 +220,7 @@ export default function MyTeamPage() {
                   <Input 
                     id="email" 
                     type="email" 
-                    placeholder="john@worknest.com" 
+                    placeholder="john@banasdairy.coop" 
                     value={newMember.email}
                     onChange={(e) => setNewMember({...newMember, email: e.target.value})}
                     required
@@ -229,7 +230,7 @@ export default function MyTeamPage() {
                   <Label htmlFor="designation">Designation</Label>
                   <Input 
                     id="designation" 
-                    placeholder="Software Engineer" 
+                    placeholder="Senior Plant Supervisor" 
                     value={newMember.designation}
                     onChange={(e) => setNewMember({...newMember, designation: e.target.value})}
                   />
@@ -261,7 +262,7 @@ export default function MyTeamPage() {
                   <Label htmlFor="announce-title">Subject</Label>
                   <Input 
                     id="announce-title" 
-                    placeholder="e.g. Q1 Team Meeting" 
+                    placeholder="e.g. Weekly Production Update" 
                     value={announcement.title}
                     onChange={(e) => setAnnouncement({...announcement, title: e.target.value})}
                     required
@@ -323,7 +324,7 @@ export default function MyTeamPage() {
                 <TrendingUp className="w-6 h-6 text-accent" />
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground uppercase">Avg. Performance</p>
+                <p className="text-sm font-medium text-muted-foreground uppercase">Avg. Performance Index</p>
                 <h3 className="text-2xl font-bold">92%</h3>
               </div>
             </div>
@@ -334,7 +335,7 @@ export default function MyTeamPage() {
       <Card className="dashboard-card">
         <CardHeader>
           <CardTitle>Direct Reports</CardTitle>
-          <CardDescription>Overview of your team members and their current status.</CardDescription>
+          <CardDescription>Overview of your team members at the Banas Dairy plant.</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
@@ -432,7 +433,7 @@ export default function MyTeamPage() {
                   </div>
                   <div>
                     <p className="text-xs font-bold">{member.name}</p>
-                    <p className="text-[10px] text-muted-foreground">Submitted Weekly Report</p>
+                    <p className="text-[10px] text-muted-foreground">Submitted Weekly Shift Report</p>
                   </div>
                 </div>
                 <span className="text-[10px] text-muted-foreground">2h ago</span>
@@ -451,7 +452,7 @@ export default function MyTeamPage() {
             <div className="flex flex-col items-center justify-center py-8 text-center space-y-2">
               <CheckCircle2 className="w-10 h-10 text-emerald-500 opacity-20" />
               <p className="text-sm font-medium">All caught up!</p>
-              <p className="text-xs text-muted-foreground">No pending leave or reimbursement requests from your team.</p>
+              <p className="text-xs text-muted-foreground">No pending leave or reimbursement requests from your team at Banas Dairy.</p>
             </div>
           </CardContent>
         </Card>
@@ -518,7 +519,7 @@ export default function MyTeamPage() {
               <TrendingUp className="w-5 h-5 text-primary" /> Performance Evaluation
             </DialogTitle>
             <DialogDescription>
-              Recording metrics and feedback for {selectedMember?.name}.
+              Recording metrics and feedback for {selectedMember?.name} at Banas Dairy.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-6 pt-4">
@@ -543,7 +544,7 @@ export default function MyTeamPage() {
               <Label htmlFor="review-comment">Feedback & Goal Setting</Label>
               <Textarea 
                 id="review-comment"
-                placeholder="Describe strengths and areas for improvement..."
+                placeholder="Describe strengths in dairy operations and areas for improvement..."
                 className="min-h-[120px]"
                 value={reviewComment}
                 onChange={(e) => setReviewComment(e.target.value)}
@@ -553,7 +554,7 @@ export default function MyTeamPage() {
             <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
               <h4 className="text-xs font-bold text-primary uppercase mb-2">Manager Tip</h4>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Constructive feedback should be specific, actionable, and delivered in a timely manner to encourage growth.
+                Specific feedback regarding plant safety and production efficiency is highly valued in our co-operative environment.
               </p>
             </div>
 

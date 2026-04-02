@@ -15,7 +15,7 @@ export const MOCK_USERS: User[] = [
   {
     id: '1',
     name: 'Sarah Connor',
-    email: 'superadmin@worknest.com',
+    email: 'superadmin@banasdairy.coop',
     role: 'SuperAdmin',
     department: 'Executive',
     designation: 'CEO',
@@ -24,7 +24,7 @@ export const MOCK_USERS: User[] = [
   {
     id: '2',
     name: 'John Doe',
-    email: 'admin@worknest.com',
+    email: 'admin@banasdairy.coop',
     role: 'Admin',
     department: 'IT',
     designation: 'System Administrator',
@@ -33,7 +33,7 @@ export const MOCK_USERS: User[] = [
   {
     id: '3',
     name: 'Jane Smith',
-    email: 'hr@worknest.com',
+    email: 'hr@banasdairy.coop',
     role: 'HR',
     department: 'Human Resources',
     designation: 'HR Manager',
@@ -42,7 +42,7 @@ export const MOCK_USERS: User[] = [
   {
     id: '4',
     name: 'Michael Scott',
-    email: 'manager@worknest.com',
+    email: 'manager@banasdairy.coop',
     role: 'Manager',
     department: 'Sales',
     designation: 'Regional Manager',
@@ -51,7 +51,7 @@ export const MOCK_USERS: User[] = [
   {
     id: '5',
     name: 'Jim Halpert',
-    email: 'employee@worknest.com',
+    email: 'employee@banasdairy.coop',
     role: 'Employee',
     department: 'Sales',
     designation: 'Sales Representative',
@@ -60,7 +60,7 @@ export const MOCK_USERS: User[] = [
   {
     id: '6',
     name: 'Oscar Martinez',
-    email: 'oscar@worknest.com',
+    email: 'oscar@banasdairy.coop',
     role: 'Employee',
     department: 'Finance',
     designation: 'Senior Accountant',
@@ -69,7 +69,7 @@ export const MOCK_USERS: User[] = [
   {
     id: '7',
     name: 'Toby Flenderson',
-    email: 'toby@worknest.com',
+    email: 'toby@banasdairy.coop',
     role: 'Employee',
     department: 'Legal',
     designation: 'Legal Advisor',
@@ -78,7 +78,7 @@ export const MOCK_USERS: User[] = [
   {
     id: '8',
     name: 'Kelly Kapoor',
-    email: 'kelly@worknest.com',
+    email: 'kelly@banasdairy.coop',
     role: 'Employee',
     department: 'Customer Support',
     designation: 'Support Lead',
@@ -87,24 +87,24 @@ export const MOCK_USERS: User[] = [
   {
     id: '9',
     name: 'Darryl Philbin',
-    email: 'darryl@worknest.com',
+    email: 'darryl@banasdairy.coop',
     role: 'Manager',
     department: 'Operations',
-    designation: 'Warehouse Manager',
+    designation: 'Plant Manager',
     joiningDate: '2017-06-20',
   },
 ];
 
 export function getSession() {
   if (typeof window === 'undefined') return null;
-  const session = localStorage.getItem('worknest_session');
+  const session = localStorage.getItem('banas_dairy_session');
   return session ? JSON.parse(session) as User : null;
 }
 
 export function setSession(user: User) {
-  localStorage.setItem('worknest_session', JSON.stringify(user));
+  localStorage.setItem('banas_dairy_session', JSON.stringify(user));
 }
 
 export function clearSession() {
-  localStorage.removeItem('worknest_session');
+  localStorage.removeItem('banas_dairy_session');
 }

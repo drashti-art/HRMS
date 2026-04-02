@@ -156,7 +156,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <Label htmlFor="n-system" className="flex flex-col gap-1 cursor-pointer">
                   <span className="font-bold">System Announcements</span>
-                  <span className="font-normal text-xs text-muted-foreground">Important updates about the WorkNest platform.</span>
+                  <span className="font-normal text-xs text-muted-foreground">Important updates about the Banas Dairy platform.</span>
                 </Label>
                 <Switch id="n-system" />
               </div>
