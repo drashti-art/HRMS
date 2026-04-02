@@ -213,16 +213,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer gap-2" onClick={() => router.push('/dashboard/profile')}>
+                <DropdownMenuItem 
+                  className="cursor-pointer gap-2" 
+                  onClick={() => router.push('/dashboard/profile')}
+                >
                   <UserCircle className="w-4 h-4" />
                   <span>My Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer gap-2" onClick={() => router.push('/dashboard/settings')}>
+                <DropdownMenuItem 
+                  className="cursor-pointer gap-2" 
+                  onClick={() => router.push('/dashboard/settings')}
+                >
                   <Settings className="w-4 h-4" />
                   <span>Account Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer gap-2 text-destructive focus:text-destructive" onClick={handleLogout}>
+                <DropdownMenuItem 
+                  className="cursor-pointer gap-2 text-destructive focus:text-destructive" 
+                  onClick={handleLogout}
+                >
                   <LogOut className="w-4 h-4" />
                   <span>Logout</span>
                 </DropdownMenuItem>
