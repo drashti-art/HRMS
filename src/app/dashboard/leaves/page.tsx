@@ -14,11 +14,29 @@ import {
   Clock, 
   Filter,
   Calendar,
-  User as UserIcon
+  User as UserIcon,
+  Plus
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSession, User } from '@/lib/auth';
 import { cn } from '@/lib/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const INITIAL_LEAVES = [
   { id: '1', employee: "John Smith", type: "Annual Leave", start: "2024-03-20", end: "2024-03-25", days: 5, status: "Pending", reason: "Family vacation" },
@@ -35,6 +53,13 @@ export default function LeavesPage() {
   const [activeTab, setActiveTab] = useState('pending');
   const [user, setUser] = useState<User | null>(null);
   const [leaves, setLeaves] = useState(INITIAL_LEAVES);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newLeave, setNewLeave] = useState({
+    type: 'Annual Leave',
+    start: '',
+    end: '',
+    reason: ''
+  });
 
   useEffect(() => {
     setUser(getSession());
@@ -58,6 +83,37 @@ export default function LeavesPage() {
     });
   };
 
+  const handleRequestLeave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newLeave.start || !newLeave.end || !newLeave.reason) return;
+
+    // Simple day calculation (difference between dates)
+    const startDate = new Date(newLeave.start);
+    const endDate = new Date(newLeave.end);
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+    const request = {
+      id: Math.random().toString(36).substr(2, 9),
+      employee: user?.name || "Current User",
+      type: newLeave.type,
+      start: newLeave.start,
+      end: newLeave.end,
+      days: diffDays,
+      status: "Pending",
+      reason: newLeave.reason
+    };
+
+    setLeaves([request, ...leaves]);
+    setIsDialogOpen(false);
+    setNewLeave({ type: 'Annual Leave', start: '', end: '', reason: '' });
+
+    toast({
+      title: "Request Submitted",
+      description: "Your leave request has been sent for approval.",
+    });
+  };
+
   const isAdminOrSuperAdmin = user?.role === 'SuperAdmin' || user?.role === 'Admin';
 
   return (
@@ -67,9 +123,78 @@ export default function LeavesPage() {
           <h1 className="text-3xl font-bold text-primary">Leaves & Approvals</h1>
           <p className="text-muted-foreground">Manage and review employee time-off requests.</p>
         </div>
-        <Button className="gap-2">
-          <Calendar className="w-4 h-4" /> Request Leave
-        </Button>
+        
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <Calendar className="w-4 h-4" /> Request Leave
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Request Time Off</DialogTitle>
+              <DialogDescription>
+                Fill in the details below to submit a new leave request.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleRequestLeave} className="space-y-4 pt-4">
+              <div className="grid gap-2">
+                <Label htmlFor="leaveType">Leave Type</Label>
+                <Select 
+                  value={newLeave.type} 
+                  onValueChange={(v) => setNewLeave({...newLeave, type: v})}
+                >
+                  <SelectTrigger id="leaveType">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Annual Leave">Annual Leave</SelectItem>
+                    <SelectItem value="Sick Leave">Sick Leave</SelectItem>
+                    <SelectItem value="Personal Leave">Personal Leave</SelectItem>
+                    <SelectItem value="Maternity Leave">Maternity Leave</SelectItem>
+                    <SelectItem value="Study Leave">Study Leave</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="start">Start Date</Label>
+                  <Input 
+                    id="start" 
+                    type="date" 
+                    value={newLeave.start}
+                    onChange={(e) => setNewLeave({...newLeave, start: e.target.value})}
+                    required 
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="end">End Date</Label>
+                  <Input 
+                    id="end" 
+                    type="date" 
+                    value={newLeave.end}
+                    onChange={(e) => setNewLeave({...newLeave, end: e.target.value})}
+                    required 
+                  />
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="reason">Reason for Leave</Label>
+                <textarea 
+                  id="reason"
+                  className="w-full min-h-[100px] p-3 rounded-md border bg-background text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  placeholder="e.g. Family vacation, medical appointment..."
+                  value={newLeave.reason}
+                  onChange={(e) => setNewLeave({...newLeave, reason: e.target.value})}
+                  required
+                />
+              </div>
+              <DialogFooter className="pt-4">
+                <Button type="submit" className="w-full">Submit Request</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {!isAdminOrSuperAdmin && (
