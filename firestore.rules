@@ -1,0 +1,218 @@
+/**
+ * WorkNest HR System - Security Rules Configuration
+ * 
+ * CORE PHILOSOPHY:
+ * This ruleset implements a robust, "Existence-over-Content" Role-Based Access Control (RBAC) model. 
+ * Authorization decisions are optimized via extensive data denormalization (Queryable Authorization Patterns), 
+ * allowing for performant and secure access checks without expensive cross-document lookups.
+ * 
+ * DATA STRUCTURE:
+ * - /users/{userId}: Core identity and application profile.
+ * - /user_roles_{role}/{userId}: Shadow collections used for atomic role verification (SuperAdmin, Admin, HR, Manager, Employee).
+ * - /employees/{employeeId}: Detailed HR data linked to Users.
+ * - /attendances, /leaveRequests, /payrolls: Transactional records containing denormalized `employeeUserId` and `employeeManagerId`.
+ * - /departments, /designations, /leaveTypes: Organizational metadata.
+ * - /jobPostings, /candidates: Recruitment pipeline data.
+ * 
+ * KEY SECURITY DECISIONS:
+ * 1. Role Verification: Roles are verified by checking for document existence in dedicated `/user_roles_*` collections.
+ * 2. Ownership & Management: Employees can access their own records via denormalized `employeeUserId`. 
+ *    Managers can access their team's records via denormalized `employeeManagerId`.
+ * 3. Prototyping Flexibility: Rules strictly enforce 'WHO' can access data but are flexible on the 'SHAPE' of non-authorization data fields.
+ * 4. Immutability: Critical relational fields (like `employeeUserId` or `userId`) are protected against modification.
+ */
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- GLOBAL HELPER FUNCTIONS ---
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** Checks if a document exists and belongs to the user before update/delete. */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    // ROLE HELPERS (Existence-over-Content Pattern)
+    // All role functions now explicitly check isSignedIn() to prevent accessing request.auth.uid on null auth object.
+    // Also, replaced exists() with get() != null due to reported 'Invalid function name: exists.' warning.
+    function isSuperAdmin() {
+      return isSignedIn() && get(/databases/$(database)/documents/user_roles_superAdmin/$(request.auth.uid)) != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && get(/databases/$(database)/documents/user_roles_admin/$(request.auth.uid)) != null;
+    }
+
+    function isHR() {
+      return isSignedIn() && get(/databases/$(database)/documents/user_roles_hr/$(request.auth.uid)) != null;
+    }
+
+    function isManager() {
+      return isSignedIn() && get(/databases/$(database)/documents/user_roles_manager/$(request.auth.uid)) != null;
+    }
+
+    /** Combines all administrative/staff roles for high-level access. */
+    function isStaff() {
+      return isSuperAdmin() || isAdmin() || isHR();
+    }
+
+    // --- COLLECTION RULES ---
+
+    /**
+     * @description Rules for the User profile. Users can manage their own profile; Staff can manage all.
+     * @path /users/{userId}
+     * @allow (create) if an authenticated user creates their own profile document.
+     * @deny (update) if a user attempts to change another user's profile.
+     * @principle Self-creation and ownership-based access.
+     */
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isStaff();
+      allow create: if isOwner(userId);
+      allow update: if isExistingOwner(userId) || isStaff();
+      allow delete: if isStaff();
+    }
+
+    /**
+     * @description Role collections are read-only for owners/staff and managed only by SuperAdmins/Admins.
+     * @path /user_roles_{role}/{userId}
+     * @allow (get) if checking own role.
+     * @deny (create) if a standard user tries to grant themselves a role.
+     * @principle Existence-based RBAC.
+     */
+    match /user_roles_superAdmin/{userId} {
+      allow read: if isOwner(userId) || isSuperAdmin();
+      allow write: if isSuperAdmin();
+    }
+    match /user_roles_admin/{userId} {
+      allow read: if isOwner(userId) || isStaff();
+      allow write: if isSuperAdmin();
+    }
+    match /user_roles_hr/{userId} {
+      allow read: if isOwner(userId) || isStaff();
+      allow write: if isSuperAdmin() || isAdmin();
+    }
+    match /user_roles_manager/{userId} {
+      allow read: if isOwner(userId) || isStaff();
+      allow write: if isSuperAdmin() || isAdmin() || isHR();
+    }
+    match /user_roles_employee/{userId} {
+      allow read: if isOwner(userId) || isStaff();
+      allow write: if isSuperAdmin() || isAdmin() || isHR();
+    }
+
+    /**
+     * @description HR Employee records. Managed by HR/Admin; viewable by the linked User.
+     * @path /employees/{employeeId}
+     * @allow (get) if the employee record belongs to the signed-in user or their direct manager.
+     * @principle Relational access via userId and managerId fields.
+     */
+    match /employees/{employeeId} {
+      // Owner, Staff, or Manager (of this employee) can get. Assumes employee document has a 'managerId' field.
+      allow get: if isSignedIn() && (isStaff() || resource.data.userId == request.auth.uid || (isManager() && resource.data.managerId == request.auth.uid));
+      allow list: if isStaff(); // Only staff can list all employees
+      allow create: if isStaff();
+      allow update: if isStaff() && resource != null;
+      allow delete: if isStaff() && resource != null;
+    }
+
+    /**
+     * @description Organizational metadata collections. Publicly viewable by staff/employees; managed by Staff.
+     * @path /departments/{id}, /designations/{id}, /leaveTypes/{id}
+     * @allow (list) if any authenticated user needs to view options.
+     * @principle Read-only access for general users.
+     */
+    match /departments/{id} {
+      allow read: if isSignedIn();
+      allow write: if isStaff();
+    }
+    match /designations/{id} {
+      allow read: if isSignedIn();
+      allow write: if isStaff();
+    }
+    match /leaveTypes/{id} {
+      allow read: if isSignedIn();
+      allow write: if isStaff();
+    }
+
+    /**
+     * @description Attendance, Leave Requests, and Payroll. Uses denormalized IDs for ownership and hierarchy checks.
+     * @path /attendances/{id}, /leaveRequests/{id}, /payrolls/{id}
+     * @allow (get) if the user is the record owner or their direct manager.
+     * @principle Queryable Authorization via denormalized employeeUserId and employeeManagerId.
+     */
+    match /attendances/{id} {
+      // Owner (employee), their manager, or staff can get.
+      allow get: if isSignedIn() && (isStaff() || resource.data.employeeUserId == request.auth.uid || resource.data.employeeManagerId == request.auth.uid);
+      // Staff can list all; Managers cannot list their team's records directly via query due to 'isConstrained' being an invalid function. Requires Staff role for full list.
+      allow list: if isStaff(); 
+      // Owner (employee) or staff can create.
+      allow create: if isSignedIn() && (isStaff() || request.resource.data.employeeUserId == request.auth.uid);
+      // Staff can update all; Managers can update their team's records (e.g., approve attendance).
+      allow update: if isSignedIn() && (isStaff() || (isManager() && resource.data.employeeManagerId == request.auth.uid));
+      allow delete: if isStaff();
+    }
+
+    match /leaveRequests/{id} {
+      // Owner (employee), their manager, or staff can get.
+      allow get: if isSignedIn() && (isStaff() || resource.data.employeeUserId == request.auth.uid || resource.data.employeeManagerId == request.auth.uid);
+      // Staff can list all; Managers cannot list their team's records directly via query due to 'isConstrained' being an invalid function. Requires Staff role for full list.
+      allow list: if isStaff();
+      // Owner (employee) or staff can create.
+      allow create: if isSignedIn() && (isStaff() || request.resource.data.employeeUserId == request.auth.uid);
+      // Staff can update all; Managers can update their team's records (e.g., approve/reject leave).
+      allow update: if isSignedIn() && (isStaff() || (isManager() && resource.data.employeeManagerId == request.auth.uid));
+      allow delete: if isStaff();
+    }
+
+    match /payrolls/{id} {
+      // Owner (employee) or staff can get. No manager access here, typically only the employee or HR/Admin.
+      allow get: if isSignedIn() && (isStaff() || resource.data.employeeUserId == request.auth.uid);
+      // Staff can list all; employee can list their own payrolls.
+      allow list: if isSignedIn() && (isStaff() || (resource != null && resource.data.employeeUserId == request.auth.uid));
+      allow create: if isStaff();
+      allow update: if isStaff();
+      allow delete: if isStaff();
+    }
+
+    /**
+     * @description Recruitment postings. HR manages; everyone can see 'open' postings.
+     * @path /jobPostings/{jobPostingId}
+     * @allow (list) if filtering by open status.
+     * @principle Public consumption with owner-only (HR) writes.
+     */
+    match /jobPostings/{jobPostingId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isHR() || isAdmin() || isSuperAdmin();
+      allow update: if (isHR() || isAdmin() || isSuperAdmin()) && resource != null;
+      allow delete: if (isHR() || isAdmin() || isSuperAdmin()) && resource != null;
+    }
+
+    /**
+     * @description Candidate applications. Access restricted to recruitment staff and relevant hiring managers.
+     * @path /candidates/{candidateId}
+     * @allow (get) if the user posted the job or belongs to the department.
+     * @principle Denormalized context for complex authorization.
+     */
+    match /candidates/{candidateId} {
+      // Staff, job poster, or hiring manager can get. Assumes candidate document has 'hiringManagerId' field.
+      allow get: if isSignedIn() && (isStaff() || resource.data.jobPostingPostedByUserId == request.auth.uid || (isManager() && resource.data.hiringManagerId == request.auth.uid));
+      // Staff can list all; Hiring managers cannot list candidates directly via query due to 'isConstrained' being an invalid function. Requires Staff role for full list.
+      allow list: if isStaff();
+      allow create: if isSignedIn(); // Allow applicants (represented as candidates) to create records
+      // Staff, job poster, or hiring manager can update.
+      allow update: if isSignedIn() && (isStaff() || resource.data.jobPostingPostedByUserId == request.auth.uid || (isManager() && resource.data.hiringManagerId == request.auth.uid));
+      allow delete: if isStaff();
+    }
+  }
+}

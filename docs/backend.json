@@ -1,0 +1,926 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents an authenticated user in the system with their assigned role and basic organizational details. This entity handles login identities.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The full name of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user, used for authentication. (format: email)",
+          "format": "email"
+        },
+        "role": {
+          "type": "string",
+          "description": "The primary role assigned to the user, determining their access level.",
+          "format": "enum"
+        },
+        "departmentId": {
+          "type": "string",
+          "description": "Reference to the Department this user is primarily associated with, if applicable. (Relationship: Department 1:N User)"
+        },
+        "designationId": {
+          "type": "string",
+          "description": "Reference to the Designation (job title) of this user, if applicable. (Relationship: Designation 1:N User)"
+        },
+        "joiningDate": {
+          "type": "string",
+          "description": "The date when the user joined the organization, if applicable. (format: date)",
+          "format": "date"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user record was created. (format: date-time)",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user record was last updated. (format: date-time)",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "role"
+      ]
+    },
+    "Employee": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Employee",
+      "type": "object",
+      "description": "Contains detailed HR-specific information for individuals employed by the organization. A User with an 'Employee', 'HR', or 'Manager' role typically has an associated Employee record.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Employee entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the associated User account. (Relationship: User 1:1 Employee)"
+        },
+        "employeeCode": {
+          "type": "string",
+          "description": "A unique internal code or ID assigned to the employee by the organization."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the employee."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the employee."
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "description": "The employee's date of birth. (format: date)",
+          "format": "date"
+        },
+        "contactNumber": {
+          "type": "string",
+          "description": "The primary contact phone number for the employee."
+        },
+        "address": {
+          "type": "string",
+          "description": "The current residential address of the employee."
+        },
+        "emergencyContactName": {
+          "type": "string",
+          "description": "The name of an emergency contact person for the employee."
+        },
+        "emergencyContactNumber": {
+          "type": "string",
+          "description": "The phone number of the emergency contact person."
+        },
+        "nationality": {
+          "type": "string",
+          "description": "The employee's nationality."
+        },
+        "maritalStatus": {
+          "type": "string",
+          "description": "The employee's marital status."
+        },
+        "bankAccountNumber": {
+          "type": "string",
+          "description": "The employee's bank account number for payroll deposits."
+        },
+        "taxIdentifier": {
+          "type": "string",
+          "description": "The employee's tax identification number (e.g., SSN, PAN)."
+        },
+        "managerId": {
+          "type": "string",
+          "description": "Reference to another Employee who is this employee's direct manager. (Relationship: Employee N:1 Employee - self-referencing)"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current employment status of the employee (e.g., 'active', 'on_leave', 'terminated')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the employee record was created. (format: date-time)",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the employee record was last updated. (format: date-time)",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "employeeCode",
+        "firstName",
+        "lastName",
+        "dateOfBirth",
+        "contactNumber",
+        "address",
+        "status"
+      ]
+    },
+    "Department": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Department",
+      "type": "object",
+      "description": "Represents an organizational department within the company.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Department entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The official name of the department."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the department's function."
+        },
+        "headOfDepartmentId": {
+          "type": "string",
+          "description": "Reference to the Employee who is the head of this department. (Relationship: Employee 1:N Department)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the department record was created. (format: date-time)",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the department record was last updated. (format: date-time)",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "Designation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Designation",
+      "type": "object",
+      "description": "Represents a job title or position within the company.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Designation entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The official name of the job designation (e.g., 'Software Engineer', 'HR Manager')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the responsibilities and requirements for this designation."
+        },
+        "level": {
+          "type": "string",
+          "description": "The seniority level of this designation (e.g., 'Entry', 'Mid', 'Senior', 'Lead', 'Executive')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the designation record was created. (format: date-time)",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the designation record was last updated. (format: date-time)",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "Attendance": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Attendance",
+      "type": "object",
+      "description": "Records an employee's daily attendance, including check-in and check-out times.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Attendance entity."
+        },
+        "employeeId": {
+          "type": "string",
+          "description": "Reference to the Employee whose attendance is being recorded. (Relationship: Employee 1:N Attendance)"
+        },
+        "date": {
+          "type": "string",
+          "description": "The date for which the attendance is recorded. (format: date)",
+          "format": "date"
+        },
+        "checkInTime": {
+          "type": "string",
+          "description": "The timestamp when the employee checked in. (format: date-time)",
+          "format": "date-time"
+        },
+        "checkOutTime": {
+          "type": "string",
+          "description": "The timestamp when the employee checked out. Optional if the employee is still checked in. (format: date-time)",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "The attendance status for the day (e.g., 'present', 'absent', 'leave', 'holiday', 'half_day')."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Any additional notes regarding the attendance record."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the attendance record was created. (format: date-time)",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the attendance record was last updated. (format: date-time)",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "employeeId",
+        "date",
+        "checkInTime",
+        "status"
+      ]
+    },
+    "LeaveType": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "LeaveType",
+      "type": "object",
+      "description": "Defines different categories of leave available to employees.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the LeaveType entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the leave type (e.g., 'Sick Leave', 'Annual Leave', 'Maternity Leave')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the leave type, including policies and eligibility."
+        },
+        "accrualRate": {
+          "type": "number",
+          "description": "The rate at which this leave type accrues (e.g., 1.5 days per month)."
+        },
+        "maxDaysPerYear": {
+          "type": "number",
+          "description": "The maximum number of days allowed for this leave type per year."
+        },
+        "requiresApproval": {
+          "type": "boolean",
+          "description": "Indicates whether this leave type requires explicit approval from a manager or HR."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the leave type record was created. (format: date-time)",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the leave type record was last updated. (format: date-time)",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "requiresApproval"
+      ]
+    },
+    "LeaveRequest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "LeaveRequest",
+      "type": "object",
+      "description": "Represents an employee's formal request for a period of leave.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the LeaveRequest entity."
+        },
+        "employeeId": {
+          "type": "string",
+          "description": "Reference to the Employee who submitted the leave request. (Relationship: Employee 1:N LeaveRequest)"
+        },
+        "leaveTypeId": {
+          "type": "string",
+          "description": "Reference to the type of leave being requested. (Relationship: LeaveType 1:N LeaveRequest)"
+        },
+        "startDate": {
+          "type": "string",
+          "description": "The start date of the requested leave period. (format: date)",
+          "format": "date"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "The end date of the requested leave period. (format: date)",
+          "format": "date"
+        },
+        "reason": {
+          "type": "string",
+          "description": "The reason provided by the employee for requesting leave."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the leave request (e.g., 'pending', 'approved', 'rejected', 'cancelled')."
+        },
+        "appliedDate": {
+          "type": "string",
+          "description": "Timestamp when the leave request was submitted by the employee. (format: date-time)",
+          "format": "date-time"
+        },
+        "approvedByUserId": {
+          "type": "string",
+          "description": "Reference to the User who approved or rejected the leave request. (Relationship: User 1:N LeaveRequest)"
+        },
+        "approvalDate": {
+          "type": "string",
+          "description": "Timestamp when the leave request was approved or rejected. (format: date-time)",
+          "format": "date-time"
+        },
+        "managerNotes": {
+          "type": "string",
+          "description": "Notes added by the manager or HR during the approval process."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the leave request record was created. (format: date-time)",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the leave request record was last updated. (format: date-time)",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "employeeId",
+        "leaveTypeId",
+        "startDate",
+        "endDate",
+        "reason",
+        "status",
+        "appliedDate"
+      ]
+    },
+    "Payroll": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Payroll",
+      "type": "object",
+      "description": "Stores details of employee salary payments for a specific pay period.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Payroll entity."
+        },
+        "employeeId": {
+          "type": "string",
+          "description": "Reference to the Employee for whom this payroll record is generated. (Relationship: Employee 1:N Payroll)"
+        },
+        "payPeriodStartDate": {
+          "type": "string",
+          "description": "The start date of the pay period covered by this payroll. (format: date)",
+          "format": "date"
+        },
+        "payPeriodEndDate": {
+          "type": "string",
+          "description": "The end date of the pay period covered by this payroll. (format: date)",
+          "format": "date"
+        },
+        "baseSalary": {
+          "type": "number",
+          "description": "The employee's base salary for the defined pay period."
+        },
+        "grossAmount": {
+          "type": "number",
+          "description": "The total earnings before any deductions for the pay period."
+        },
+        "deductionsTotal": {
+          "type": "number",
+          "description": "The total amount deducted from the gross salary (e.g., taxes, provident fund)."
+        },
+        "bonusesTotal": {
+          "type": "number",
+          "description": "The total amount of bonuses or additional payments for the pay period."
+        },
+        "netAmount": {
+          "type": "number",
+          "description": "The final amount paid to the employee after all calculations (gross - deductions + bonuses)."
+        },
+        "currency": {
+          "type": "string",
+          "description": "The currency in which the payroll is processed (e.g., 'USD', 'EUR')."
+        },
+        "paymentDate": {
+          "type": "string",
+          "description": "The date when the payroll payment was issued. (format: date)",
+          "format": "date"
+        },
+        "status": {
+          "type": "string",
+          "description": "The processing status of the payroll (e.g., 'generated', 'approved', 'paid', 'failed')."
+        },
+        "generatedByUserId": {
+          "type": "string",
+          "description": "Reference to the User (Admin or HR) who generated this payroll record. (Relationship: User 1:N Payroll)"
+        },
+        "approvedByUserId": {
+          "type": "string",
+          "description": "Reference to the User (Admin or HR) who approved this payroll record. (Relationship: User 1:N Payroll)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the payroll record was created. (format: date-time)",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the payroll record was last updated. (format: date-time)",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "employeeId",
+        "payPeriodStartDate",
+        "payPeriodEndDate",
+        "baseSalary",
+        "grossAmount",
+        "deductionsTotal",
+        "bonusesTotal",
+        "netAmount",
+        "currency",
+        "paymentDate",
+        "status",
+        "generatedByUserId"
+      ]
+    },
+    "JobPosting": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "JobPosting",
+      "type": "object",
+      "description": "Details for a job vacancy advertised by the organization for recruitment.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the JobPosting entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the job vacancy (e.g., 'Senior Software Engineer')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A comprehensive description of the job role and its context within the company."
+        },
+        "requirements": {
+          "type": "string",
+          "description": "A list or summary of required skills, qualifications, and experience for the role."
+        },
+        "responsibilities": {
+          "type": "string",
+          "description": "A list or summary of the key duties and responsibilities associated with the role."
+        },
+        "location": {
+          "type": "string",
+          "description": "The geographical location of the job (e.g., 'Remote', 'New York, NY', 'On-site')."
+        },
+        "employmentType": {
+          "type": "string",
+          "description": "The type of employment offered (e.g., 'Full-time', 'Part-time', 'Contract', 'Internship')."
+        },
+        "departmentId": {
+          "type": "string",
+          "description": "Reference to the Department that has this job opening. (Relationship: Department 1:N JobPosting)"
+        },
+        "designationId": {
+          "type": "string",
+          "description": "Reference to the Designation that this job posting is for. (Relationship: Designation 1:N JobPosting)"
+        },
+        "salaryRangeMin": {
+          "type": "number",
+          "description": "The minimum expected annual salary for this role."
+        },
+        "salaryRangeMax": {
+          "type": "number",
+          "description": "The maximum expected annual salary for this role."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the job posting (e.g., 'open', 'closed', 'draft', 'on_hold')."
+        },
+        "postedByUserId": {
+          "type": "string",
+          "description": "Reference to the User (HR) who created this job posting. (Relationship: User 1:N JobPosting)"
+        },
+        "postedDate": {
+          "type": "string",
+          "description": "Timestamp when the job posting was published. (format: date-time)",
+          "format": "date-time"
+        },
+        "closingDate": {
+          "type": "string",
+          "description": "The deadline for submitting applications for this job. (format: date)",
+          "format": "date"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the job posting record was created. (format: date-time)",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the job posting record was last updated. (format: date-time)",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "description",
+        "requirements",
+        "responsibilities",
+        "location",
+        "employmentType",
+        "status",
+        "postedByUserId",
+        "postedDate"
+      ]
+    },
+    "Candidate": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Candidate",
+      "type": "object",
+      "description": "Contains information about an applicant for a job posting, including their application details and resume content.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Candidate entity."
+        },
+        "jobPostingId": {
+          "type": "string",
+          "description": "Reference to the JobPosting the candidate applied for. (Relationship: JobPosting 1:N Candidate)"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the candidate."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the candidate."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the candidate. (format: email)",
+          "format": "email"
+        },
+        "contactNumber": {
+          "type": "string",
+          "description": "The contact phone number of the candidate."
+        },
+        "resumeText": {
+          "type": "string",
+          "description": "The full text content extracted from the candidate's resume, used for AI processing."
+        },
+        "coverLetterText": {
+          "type": "string",
+          "description": "The full text content of the candidate's cover letter."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current application status of the candidate (e.g., 'applied', 'in_review', 'shortlisted', 'interviewing', 'offered', 'rejected', 'hired')."
+        },
+        "applicationDate": {
+          "type": "string",
+          "description": "Timestamp when the candidate submitted their application. (format: date-time)",
+          "format": "date-time"
+        },
+        "aiSummary": {
+          "type": "string",
+          "description": "An AI-generated summary of the candidate's resume."
+        },
+        "feedback": {
+          "type": "string",
+          "description": "Internal feedback or notes from recruiters/hiring managers regarding the candidate."
+        },
+        "lastUpdatedByUserId": {
+          "type": "string",
+          "description": "Reference to the User who last updated this candidate's record. (Relationship: User 1:N Candidate)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the candidate record was created. (format: date-time)",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the candidate record was last updated. (format: date-time)",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "jobPostingId",
+        "firstName",
+        "lastName",
+        "email",
+        "contactNumber",
+        "resumeText",
+        "status",
+        "applicationDate"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user authentication and profile information. The 'id' field matches the Firestore 'userId' (request.auth.uid). The 'role' field is for application logic; security rules rely on dedicated role collections for authorization. Includes denormalized 'departmentId' and 'designationId'.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user, matching Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/user_roles_superAdmin/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Dedicated collection to grant 'Super Admin' role via document existence. Used for robust, atomic rule checks (Existence over Content) for Super Admin permissions.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user, matching Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/user_roles_admin/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Dedicated collection to grant 'Admin' role via document existence. Used for robust, atomic rule checks (Existence over Content) for Admin permissions.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user, matching Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/user_roles_hr/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Dedicated collection to grant 'HR' role via document existence. Used for robust, atomic rule checks (Existence over Content) for HR permissions.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user, matching Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/user_roles_manager/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Dedicated collection to grant 'Manager' role via document existence. Used for robust, atomic rule checks (Existence over Content) for Manager permissions.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user, matching Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/user_roles_employee/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Dedicated collection to grant 'Employee' role via document existence. Used for robust, atomic rule checks (Existence over Content) for Employee permissions. This might be a default role.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user, matching Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/employees/{employeeId}",
+        "definition": {
+          "entityName": "Employee",
+          "schema": {
+            "$ref": "#/backend/entities/Employee"
+          },
+          "description": "Stores detailed HR-specific information for employees. Includes 'userId' to link to the User account and 'managerId' for hierarchical reporting. 'departmentId' and 'designationId' are references.",
+          "params": [
+            {
+              "name": "employeeId",
+              "description": "The unique ID of the employee."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/departments/{departmentId}",
+        "definition": {
+          "entityName": "Department",
+          "schema": {
+            "$ref": "#/backend/entities/Department"
+          },
+          "description": "Represents an organizational department. Includes 'headOfDepartmentId' (reference to Employee) and denormalized 'headOfDepartmentUserId' for authorization independence.",
+          "params": [
+            {
+              "name": "departmentId",
+              "description": "The unique ID of the department."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/designations/{designationId}",
+        "definition": {
+          "entityName": "Designation",
+          "schema": {
+            "$ref": "#/backend/entities/Designation"
+          },
+          "description": "Represents a job title or position within the company. Globally accessible for HR/Admin, viewable by others.",
+          "params": [
+            {
+              "name": "designationId",
+              "description": "The unique ID of the designation."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/leaveTypes/{leaveTypeId}",
+        "definition": {
+          "entityName": "LeaveType",
+          "schema": {
+            "$ref": "#/backend/entities/LeaveType"
+          },
+          "description": "Defines different categories of leave. Globally accessible for HR/Admin, viewable by employees to apply for leave.",
+          "params": [
+            {
+              "name": "leaveTypeId",
+              "description": "The unique ID of the leave type."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/attendances/{attendanceId}",
+        "definition": {
+          "entityName": "Attendance",
+          "schema": {
+            "$ref": "#/backend/entities/Attendance"
+          },
+          "description": "Records an employee's daily attendance. Includes denormalized 'employeeUserId', 'employeeManagerId', and 'employeeDepartmentId' for authorization independence and QAPs.",
+          "params": [
+            {
+              "name": "attendanceId",
+              "description": "The unique ID of the attendance record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/leaveRequests/{leaveRequestId}",
+        "definition": {
+          "entityName": "LeaveRequest",
+          "schema": {
+            "$ref": "#/backend/entities/LeaveRequest"
+          },
+          "description": "Represents an employee's formal leave request. Includes denormalized 'employeeUserId', 'employeeManagerId', 'employeeDepartmentId', and 'approvedByUserId' for authorization independence and QAPs.",
+          "params": [
+            {
+              "name": "leaveRequestId",
+              "description": "The unique ID of the leave request."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/payrolls/{payrollId}",
+        "definition": {
+          "entityName": "Payroll",
+          "schema": {
+            "$ref": "#/backend/entities/Payroll"
+          },
+          "description": "Stores details of employee salary payments. Includes denormalized 'employeeUserId', 'employeeDepartmentId', 'generatedByUserId', and 'approvedByUserId' for authorization independence and QAPs.",
+          "params": [
+            {
+              "name": "payrollId",
+              "description": "The unique ID of the payroll record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/jobPostings/{jobPostingId}",
+        "definition": {
+          "entityName": "JobPosting",
+          "schema": {
+            "$ref": "#/backend/entities/JobPosting"
+          },
+          "description": "Details for a job vacancy. Includes 'postedByUserId' for ownership and 'status' (e.g., 'open', 'draft') to facilitate QAPs for public viewing and HR management. 'departmentId' and 'designationId' are references.",
+          "params": [
+            {
+              "name": "jobPostingId",
+              "description": "The unique ID of the job posting."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/candidates/{candidateId}",
+        "definition": {
+          "entityName": "Candidate",
+          "schema": {
+            "$ref": "#/backend/entities/Candidate"
+          },
+          "description": "Contains applicant information. Denormalizes 'jobPostingDepartmentId' and 'jobPostingPostedByUserId' from the associated JobPosting for authorization independence and QAPs (e.g., HR/Managers viewing candidates for specific departments or postings).",
+          "params": [
+            {
+              "name": "candidateId",
+              "description": "The unique ID of the candidate."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure for the WorkNest HR system is designed with a strong emphasis on Authorization Independence, Structural Segregation, and Queryable Authorization Patterns (QAPs) to ensure security, scalability, and debuggability. \n\n**Authorization Independence:** This is achieved primarily through pervasive denormalization. Rather than relying on `get()` operations in security rules (which are complex, prone to breaking atomic operations, and difficult to debug), critical authorization context is copied directly into the documents. For instance, `Attendance`, `LeaveRequest`, and `Payroll` documents, which relate to an `Employee`, will not only store `employeeId` but also denormalize `employeeUserId` (the `userId` linked to that employee's profile) and `employeeManagerId` (the `employeeId` of their direct manager). Similarly, `Candidate` documents will denormalize `jobPostingDepartmentId` and `jobPostingPostedByUserId` from the associated `JobPosting`. Roles themselves are handled using an 'Existence over Content' pattern: dedicated top-level collections like `/user_roles_admin/{userId}` exist. The mere presence of a document at such a path grants the user that role, allowing for direct and atomic rule checks like `if exists(/databases/$(database)/documents/user_roles_admin/$(request.auth.uid))` without needing to read the user's full profile.\n\n**Queryable Authorization Patterns (QAPs):** This structure ensures that `list` operations remain secure and efficient. \n*   **Structural Segregation** is used to group documents with similar security needs. For example, `JobPosting` documents for public viewing will have a `status: 'open'`, allowing a single collection with query filters for public access, while HR/Admins can view all statuses. \n*   For employee-specific data (e.g., `Attendance`, `LeaveRequest`, `Payroll`), instead of deep nesting, these are placed in top-level collections. Each document includes denormalized `employeeUserId` and `employeeManagerId`. This allows an employee to securely `list` their own records (`where('employeeUserId', '==', request.auth.uid)`) and managers to `list` their team's records (`where('employeeManagerId', '==', request.auth.uid)`) without performing cross-document `get()` calls in the security rules. HR/Admins can list all records by checking their role via the dedicated role collections.\n\n**Summary of Path Structure & Denormalization:**\n*   **`/users/{userId}`**: Stores core user profile. The `role` field here is for application logic, while actual rule authorization uses dedicated role collections.\n*   **Role Collections (`/user_roles_superAdmin/{userId}`, etc.)**: Implement DBAC via 'Existence over Content' for robust, atomic role checks in security rules.\n*   **`/employees/{employeeId}`**: Contains core HR data. `userId` (linking to `/users/{userId}`) and `managerId` are present. `departmentId` and `designationId` are references.\n*   **`/departments/{departmentId}`**: Organizational units. `headOfDepartmentUserId` is denormalized from the `Employee` record of the head, enabling direct authorization checks for department heads.\n*   **`/designations/{designationId}` & `/leaveTypes/{leaveTypeId}`**: Global, reference data primarily managed by HR/Admins.\n*   **`/jobPostings/{jobPostingId}`**: Job vacancy details. `postedByUserId` is denormalized for creator-based access control. The `status` field (`open`, `draft`) enables QAPs for public listing.\n*   **`/candidates/{candidateId}`**: Applicant information. Denormalizes `jobPostingId`, `jobPostingDepartmentId`, and `jobPostingPostedByUserId` to allow HR/Manager to query and manage candidates relevant to specific job postings or departments without additional `get()` calls.\n*   **`/attendances/{attendanceId}`**, **`/leaveRequests/{leaveRequestId}`**, **`/payrolls/{payrollId}`**: These collections each include denormalized `employeeUserId`, `employeeManagerId`, and `employeeDepartmentId`. This design allows for efficient, secure `list` queries by employees (for their own records), by managers (for their team's records), and by HR/Admins (for all or department-specific records), all while maintaining Authorization Independence by avoiding `get()` calls.\n\nThis architecture ensures that security rules are straightforward, permissions are explicit, and the system can scale effectively while providing strong data integrity and debuggability."
+  }
+}
