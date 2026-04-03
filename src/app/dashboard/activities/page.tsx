@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -9,16 +10,16 @@ import { Search, History, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const MOCK_ACTIVITIES = [
-  { id: '1', user: "Sarah Connor", action: "Approved leave for John Smith", time: "2 hours ago", type: "Leave", status: "Completed" },
-  { id: '2', user: "Michael Scott", action: "Posted new job opening: Senior Developer", time: "4 hours ago", type: "Recruitment", status: "Active" },
-  { id: '3', user: "Jim Halpert", action: "Clocked in successfully", time: "6 hours ago", type: "Attendance", status: "Success" },
-  { id: '4', user: "Jane Smith", action: "Updated payroll for March", time: "1 day ago", type: "Payroll", status: "Completed" },
-  { id: '5', user: "Sarah Connor", action: "Changed system settings", time: "1 day ago", type: "System", status: "Completed" },
-  { id: '6', user: "Dwight Schrute", action: "Requested annual leave", time: "2 days ago", type: "Leave", status: "Pending" },
-  { id: '7', user: "Pam Beesly", action: "Submitted performance review", time: "2 days ago", type: "Performance", status: "Submitted" },
-  { id: '8', user: "Kevin Malone", action: "Clocked out successfully", time: "3 days ago", type: "Attendance", status: "Success" },
-  { id: '9', user: "Angela Martin", action: "Validated expense reports", time: "3 days ago", type: "Finance", status: "Completed" },
-  { id: '10', user: "Stanley Hudson", action: "Started training module", time: "4 days ago", type: "Training", status: "In Progress" },
+  { id: '1', user: "Rekhaben Chaudhary", action: "Approved leave for Jignesh Chaudhary", time: "2 hours ago", type: "Leave", status: "Completed" },
+  { id: '2', user: "Shankarbhai Chaudhary", action: "Posted new job opening: Senior Plant Supervisor", time: "4 hours ago", type: "Recruitment", status: "Active" },
+  { id: '3', user: "Hiteshbhai Chaudhary", action: "Clocked in successfully", time: "6 hours ago", type: "Attendance", status: "Success" },
+  { id: '4', user: "Pinkiben Chaudhary", action: "Updated payroll for March", time: "1 day ago", type: "Payroll", status: "Completed" },
+  { id: '5', user: "Rekhaben Chaudhary", action: "Changed system security settings", time: "1 day ago", type: "System", status: "Completed" },
+  { id: '6', user: "Jignesh Chaudhary", action: "Requested annual leave", time: "2 days ago", type: "Leave", status: "Pending" },
+  { id: '7', user: "Manishaben Chaudhary", action: "Submitted performance review", time: "2 days ago", type: "Performance", status: "Submitted" },
+  { id: '8', user: "Ashokbhai Chaudhary", action: "Clocked out successfully", time: "3 days ago", type: "Attendance", status: "Success" },
+  { id: '9', user: "Sitaben Chaudhary", action: "Validated expense reports", time: "3 days ago", type: "Finance", status: "Completed" },
+  { id: '10', user: "Parsottambhai Chaudhary", action: "Started training module", time: "4 days ago", type: "Training", status: "In Progress" },
 ];
 
 export default function ActivitiesPage() {
@@ -34,7 +35,7 @@ export default function ActivitiesPage() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
         <h1 className="text-3xl font-bold text-primary">Activity History</h1>
-        <p className="text-muted-foreground">Detailed log of all actions performed across the platform.</p>
+        <p className="text-muted-foreground">Detailed log of all actions performed across the Banas Dairy platform.</p>
       </div>
 
       <Card className="dashboard-card border-none shadow-lg">

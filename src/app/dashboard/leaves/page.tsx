@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -39,12 +40,12 @@ import {
 } from "@/components/ui/select";
 
 const INITIAL_LEAVES = [
-  { id: '1', employee: "John Smith", type: "Annual Leave", start: "2024-03-20", end: "2024-03-25", days: 5, status: "Pending", reason: "Family vacation" },
-  { id: '2', employee: "Alice Brown", type: "Sick Leave", start: "2024-03-15", end: "2024-03-16", days: 1, status: "Pending", reason: "Medical appointment" },
-  { id: '3', employee: "Bob Wilson", type: "Personal Leave", start: "2024-03-10", end: "2024-03-10", days: 1, status: "Approved", reason: "Personal work" },
-  { id: '4', employee: "Charlie Davis", type: "Annual Leave", start: "2024-04-05", end: "2024-04-12", days: 7, status: "Pending", reason: "Home renovation" },
-  { id: '5', employee: "Diana Prince", type: "Maternity Leave", start: "2024-05-01", end: "2024-08-01", days: 90, status: "Approved", reason: "Maternity" },
-  { id: '6', employee: "Edward Norton", type: "Sick Leave", start: "2024-03-01", end: "2024-03-03", days: 2, status: "Rejected", reason: "Insufficient notice" },
+  { id: '1', employee: "Karshanbhai Chaudhary", type: "Annual Leave", start: "2024-03-20", end: "2024-03-25", days: 5, status: "Pending", reason: "Family event in village" },
+  { id: '2', employee: "Rekhaben Chaudhary", type: "Sick Leave", start: "2024-03-15", end: "2024-03-16", days: 1, status: "Pending", reason: "Medical checkup" },
+  { id: '3', employee: "Valabhai Chaudhary", type: "Personal Leave", start: "2024-03-10", end: "2024-03-10", days: 1, status: "Approved", reason: "Personal work" },
+  { id: '4', employee: "Jignesh Chaudhary", type: "Annual Leave", start: "2024-04-05", end: "2024-04-12", days: 7, status: "Pending", reason: "Home renovation" },
+  { id: '5', employee: "Pinkiben Chaudhary", type: "Maternity Leave", start: "2024-05-01", end: "2024-08-01", days: 90, status: "Approved", reason: "Maternity" },
+  { id: '6', employee: "Amratbhai Chaudhary", type: "Sick Leave", start: "2024-03-01", end: "2024-03-03", days: 2, status: "Rejected", reason: "Insufficient notice" },
 ];
 
 export default function LeavesPage() {
@@ -87,7 +88,6 @@ export default function LeavesPage() {
     e.preventDefault();
     if (!newLeave.start || !newLeave.end || !newLeave.reason) return;
 
-    // Simple day calculation (difference between dates)
     const startDate = new Date(newLeave.start);
     const endDate = new Date(newLeave.end);
     const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
@@ -122,7 +122,7 @@ export default function LeavesPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-primary">Leaves & Approvals</h1>
-          <p className="text-muted-foreground">Manage and review employee time-off requests.</p>
+          <p className="text-muted-foreground">Manage and review employee time-off requests at Banas Dairy.</p>
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -184,7 +184,7 @@ export default function LeavesPage() {
                 <textarea 
                   id="reason"
                   className="w-full min-h-[100px] p-3 rounded-md border bg-background text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  placeholder="e.g. Family vacation, medical appointment..."
+                  placeholder="e.g. Family function, medical appointment..."
                   value={newLeave.reason}
                   onChange={(e) => setNewLeave({...newLeave, reason: e.target.value})}
                   required
@@ -197,50 +197,6 @@ export default function LeavesPage() {
           </DialogContent>
         </Dialog>
       </div>
-
-      {!isAdminOrSuperAdmin && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-full">
-                  <Clock className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                  <h3 className="text-2xl font-bold">14</h3>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-emerald-50 border-emerald-200">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-emerald-100 rounded-full">
-                  <CheckCircle2 className="w-6 h-6 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Approved</p>
-                  <h3 className="text-2xl font-bold text-emerald-700">85</h3>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-rose-50 border-rose-200">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-rose-100 rounded-full">
-                  <XCircle className="w-6 h-6 text-rose-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Rejected</p>
-                  <h3 className="text-2xl font-bold text-rose-700">12</h3>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       <Card className="dashboard-card border-none shadow-lg">
         <CardHeader className="pb-0">

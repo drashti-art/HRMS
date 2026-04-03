@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -46,13 +47,13 @@ interface AttendanceRecord {
 }
 
 const MOCK_HISTORY: AttendanceRecord[] = [
-  { id: '1', employeeName: 'Jim Halpert', department: 'Sales', date: '2024-03-14', clockIn: '08:55 AM', clockOut: '06:05 PM', status: 'On Time', totalHours: '9h 10m', location: 'Office - HQ', device: 'Web App' },
-  { id: '2', employeeName: 'Pam Beesly', department: 'Sales', date: '2024-03-14', clockIn: '09:00 AM', clockOut: '06:00 PM', status: 'On Time', totalHours: '9h 00m', location: 'Remote', device: 'Mobile App' },
-  { id: '3', employeeName: 'Michael Scott', department: 'Sales', date: '2024-03-13', clockIn: '09:15 AM', clockOut: '06:15 PM', status: 'Late', totalHours: '9h 00m', location: 'Office - HQ', device: 'Web App' },
-  { id: '4', employeeName: 'Dwight Schrute', department: 'Sales', date: '2024-03-12', clockIn: '08:50 AM', clockOut: '05:30 PM', status: 'On Time', totalHours: '8h 40m', location: 'Office - HQ', device: 'Biometric' },
-  { id: '5', employeeName: 'Angela Martin', department: 'Finance', date: '2024-03-11', clockIn: '09:05 AM', clockOut: '06:00 PM', status: 'On Time', totalHours: '8h 55m', location: 'Office - HQ', device: 'Web App' },
-  { id: '6', employeeName: 'Oscar Martinez', department: 'Finance', date: '2024-03-11', clockIn: '08:55 AM', clockOut: '05:45 PM', status: 'On Time', totalHours: '8h 50m', location: 'Office - HQ', device: 'Web App' },
-  { id: '7', employeeName: 'Kelly Kapoor', department: 'Customer Support', date: '2024-03-10', clockIn: '09:10 AM', clockOut: '06:10 PM', status: 'Late', totalHours: '9h 00m', location: 'Office - HQ', device: 'Web App' },
+  { id: '1', employeeName: 'Hiteshbhai Chaudhary', department: 'Sales', date: '2024-03-14', clockIn: '08:55 AM', clockOut: '06:05 PM', status: 'On Time', totalHours: '9h 10m', location: 'Palanpur - HQ', device: 'Web App' },
+  { id: '2', employeeName: 'Manishaben Chaudhary', department: 'Sales', date: '2024-03-14', clockIn: '09:00 AM', clockOut: '06:00 PM', status: 'On Time', totalHours: '9h 00m', location: 'Remote', device: 'Mobile App' },
+  { id: '3', employeeName: 'Shankarbhai Chaudhary', department: 'Sales', date: '2024-03-13', clockIn: '09:15 AM', clockOut: '06:15 PM', status: 'Late', totalHours: '9h 00m', location: 'Palanpur - HQ', device: 'Web App' },
+  { id: '4', employeeName: 'Jignesh Chaudhary', department: 'Sales', date: '2024-03-12', clockIn: '08:50 AM', clockOut: '05:30 PM', status: 'On Time', totalHours: '8h 40m', location: 'Palanpur - HQ', device: 'Biometric' },
+  { id: '5', employeeName: 'Rekhaben Chaudhary', department: 'Executive', date: '2024-03-11', clockIn: '09:05 AM', clockOut: '06:00 PM', status: 'On Time', totalHours: '8h 55m', location: 'Palanpur - HQ', device: 'Web App' },
+  { id: '6', employeeName: 'Valabhai Chaudhary', department: 'Finance', date: '2024-03-11', clockIn: '08:55 AM', clockOut: '05:45 PM', status: 'On Time', totalHours: '8h 50m', location: 'Palanpur - HQ', device: 'Web App' },
+  { id: '7', employeeName: 'Sitaben Chaudhary', department: 'Finance', date: '2024-03-10', clockIn: '09:10 AM', clockOut: '06:10 PM', status: 'Late', totalHours: '9h 00m', location: 'Palanpur - HQ', device: 'Web App' },
 ];
 
 export default function AttendancePage() {
@@ -78,7 +79,6 @@ export default function AttendancePage() {
     const dateStr = now.toISOString().split('T')[0];
 
     if (!isClockedIn) {
-      // Clocking In
       const newRecordId = Math.random().toString(36).substr(2, 9);
       const newRecord: AttendanceRecord = {
         id: newRecordId,
@@ -89,7 +89,7 @@ export default function AttendancePage() {
         clockOut: null,
         status: 'Active',
         totalHours: 'Calculating...',
-        location: 'Office - HQ',
+        location: 'Palanpur - HQ',
         device: 'Web App'
       };
 
@@ -102,23 +102,19 @@ export default function AttendancePage() {
         description: `Successfully clocked in at ${timeStr}. Have a great day!`,
       });
     } else {
-      // Clocking Out
       setIsClockedIn(false);
-      
       setAttendanceHistory(prev => prev.map(record => {
         if (record.id === activeRecordId) {
           return {
             ...record,
             clockOut: timeStr,
-            status: 'On Time', // Default status for simulation
-            totalHours: '8h 30m' // Mocked duration
+            status: 'On Time',
+            totalHours: '8h 30m'
           };
         }
         return record;
       }));
-      
       setActiveRecordId(null);
-      
       toast({
         title: "Clocked Out",
         description: `Successfully clocked out at ${timeStr}. See you tomorrow!`,
@@ -131,26 +127,21 @@ export default function AttendancePage() {
     setIsDetailsOpen(true);
   };
 
-  // Logic to filter logs based on role
   const filteredHistory = attendanceHistory.filter(record => {
-    // 1. Search term filter
     const matchesSearch = record.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          record.department.toLowerCase().includes(searchTerm.toLowerCase());
     
     if (!matchesSearch) return false;
-
-    // 2. Role based visibility
     if (!user) return false;
 
     if (user.role === 'SuperAdmin' || user.role === 'Admin' || user.role === 'HR') {
-      return true; // See everyone
+      return true;
     }
 
     if (user.role === 'Manager') {
-      return record.department === user.department; // See only their department
+      return record.department === user.department;
     }
 
-    // Default: Employees see only themselves
     return record.employeeName === user.name;
   });
 
@@ -232,7 +223,7 @@ export default function AttendancePage() {
                   <MapPin className="w-4 h-4" /> Location Tracking
                 </span>
                 <Badge variant="outline" className="text-white border-white/30 bg-white/10">
-                  Office - HQ
+                  Palanpur - HQ
                 </Badge>
               </div>
             </div>
@@ -391,7 +382,6 @@ export default function AttendancePage() {
         </CardContent>
       </Card>
 
-      {/* Details Dialog */}
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -43,14 +44,14 @@ interface AuditLog {
 }
 
 const MOCK_LOGS: AuditLog[] = [
-  { id: 'log-1', timestamp: '2024-03-15 10:45:22', user: 'Sarah Connor', action: 'Modified System Security Policy', module: 'Settings', ipAddress: '192.168.1.45', severity: 'High', status: 'Success' },
-  { id: 'log-2', timestamp: '2024-03-15 09:12:05', user: 'John Doe', action: 'User Login Attempt', module: 'Auth', ipAddress: '10.0.0.12', severity: 'Low', status: 'Success' },
+  { id: 'log-1', timestamp: '2024-03-15 10:45:22', user: 'Rekhaben Chaudhary', action: 'Modified System Security Policy', module: 'Settings', ipAddress: '192.168.1.45', severity: 'High', status: 'Success' },
+  { id: 'log-2', timestamp: '2024-03-15 09:12:05', user: 'Bharatbhai Chaudhary', action: 'User Login Attempt', module: 'Auth', ipAddress: '10.0.0.12', severity: 'Low', status: 'Success' },
   { id: 'log-3', timestamp: '2024-03-14 23:55:10', user: 'System', action: 'Automated Database Backup', module: 'System', ipAddress: 'Localhost', severity: 'Low', status: 'Success' },
-  { id: 'log-4', timestamp: '2024-03-14 18:30:45', user: 'Michael Scott', action: 'Failed Payroll Approval', module: 'Payroll', ipAddress: '172.16.254.1', severity: 'Medium', status: 'Failed' },
-  { id: 'log-5', timestamp: '2024-03-14 14:20:00', user: 'Jane Smith', action: 'Deleted Employee Record #882', module: 'Employees', ipAddress: '192.168.1.102', severity: 'Critical', status: 'Success' },
-  { id: 'log-6', timestamp: '2024-03-13 11:15:33', user: 'Sarah Connor', action: 'Bulk Permission Update', module: 'Security', ipAddress: '192.168.1.45', severity: 'High', status: 'Success' },
+  { id: 'log-4', timestamp: '2024-03-14 18:30:45', user: 'Shankarbhai Chaudhary', action: 'Failed Payroll Approval', module: 'Payroll', ipAddress: '172.16.254.1', severity: 'Medium', status: 'Failed' },
+  { id: 'log-5', timestamp: '2024-03-14 14:20:00', user: 'Pinkiben Chaudhary', action: 'Deleted Employee Record #882', module: 'Employees', ipAddress: '192.168.1.102', severity: 'Critical', status: 'Success' },
+  { id: 'log-6', timestamp: '2024-03-13 11:15:33', user: 'Rekhaben Chaudhary', action: 'Bulk Permission Update', module: 'Security', ipAddress: '192.168.1.45', severity: 'High', status: 'Success' },
   { id: 'log-7', timestamp: '2024-03-13 08:00:12', user: 'Admin Account', action: 'API Key Rotated', module: 'Security', ipAddress: '45.76.12.99', severity: 'High', status: 'Success' },
-  { id: 'log-8', timestamp: '2024-03-12 16:45:55', user: 'Toby Flenderson', action: 'Accessed Personnel Files', module: 'HR', ipAddress: '192.168.1.15', severity: 'Medium', status: 'Success' },
+  { id: 'log-8', timestamp: '2024-03-12 16:45:55', user: 'Karshanbhai Chaudhary', action: 'Accessed Personnel Files', module: 'HR', ipAddress: '192.168.1.15', severity: 'Medium', status: 'Success' },
 ];
 
 export default function AuditLogsPage() {
@@ -70,7 +71,7 @@ export default function AuditLogsPage() {
         <Lock className="w-12 h-12 text-destructive opacity-20" />
         <h2 className="text-xl font-bold">Access Restricted</h2>
         <p className="text-muted-foreground text-center max-w-sm">
-          You do not have the required permissions to view system audit logs. This page is restricted to Super Administrators.
+          You do not have the required permissions to view system audit logs. This page is restricted to Super Administrators at Banas Dairy.
         </p>
       </div>
     );
@@ -120,7 +121,7 @@ export default function AuditLogsPage() {
           <h1 className="text-3xl font-bold text-primary flex items-center gap-3">
             <ShieldAlert className="w-8 h-8" /> System Audit Logs
           </h1>
-          <p className="text-muted-foreground">Monitor and investigate all administrative actions across the platform.</p>
+          <p className="text-muted-foreground">Monitor and investigate all administrative actions across the Banas Dairy platform.</p>
         </div>
         <div className="flex gap-3">
           <Popover>
@@ -158,53 +159,11 @@ export default function AuditLogsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="dashboard-card bg-primary/5 border-primary/20">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-primary/10 rounded-full">
-                <Activity className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground uppercase">Total Events</p>
-                <h3 className="text-2xl font-bold">14,208</h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="dashboard-card bg-rose-50 border-rose-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-rose-100 rounded-full">
-                <AlertTriangle className="w-6 h-6 text-rose-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground uppercase">Critical Alerts</p>
-                <h3 className="text-2xl font-bold text-rose-700">12</h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="dashboard-card bg-emerald-50 border-emerald-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-emerald-100 rounded-full">
-                <Monitor className="w-6 h-6 text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground uppercase">System Integrity</p>
-                <h3 className="text-2xl font-bold text-emerald-700">Healthy</h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       <Card className="dashboard-card">
         <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
           <div className="space-y-1">
             <CardTitle>Security Events</CardTitle>
-            <CardDescription>Real-time stream of authenticated system operations.</CardDescription>
+            <CardDescription>Real-time stream of authenticated system operations at HQ.</CardDescription>
           </div>
           <div className="relative w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -290,18 +249,6 @@ export default function AuditLogsPage() {
                     <div className="flex flex-col items-center gap-2">
                       <Info className="w-8 h-8 opacity-20" />
                       <p>No security events matching your criteria were found.</p>
-                      {(searchTerm || selectedDate) && (
-                        <Button 
-                          variant="link" 
-                          size="sm" 
-                          onClick={() => {
-                            setSearchTerm('');
-                            setSelectedDate(undefined);
-                          }}
-                        >
-                          Clear all filters
-                        </Button>
-                      )}
                     </div>
                   </TableCell>
                 </TableRow>

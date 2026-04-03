@@ -14,7 +14,7 @@ export interface User {
 export const MOCK_USERS: User[] = [
   {
     id: '1',
-    name: 'Sarah Connor',
+    name: 'Rekhaben Chaudhary',
     email: 'superadmin@banasdairy.coop',
     role: 'SuperAdmin',
     department: 'Executive',
@@ -23,7 +23,7 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: '2',
-    name: 'John Doe',
+    name: 'Bharatbhai Chaudhary',
     email: 'admin@banasdairy.coop',
     role: 'Admin',
     department: 'IT',
@@ -32,7 +32,7 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: '3',
-    name: 'Jane Smith',
+    name: 'Pinkiben Chaudhary',
     email: 'hr@banasdairy.coop',
     role: 'HR',
     department: 'Human Resources',
@@ -41,7 +41,7 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: '4',
-    name: 'Michael Scott',
+    name: 'Shankarbhai Chaudhary',
     email: 'manager@banasdairy.coop',
     role: 'Manager',
     department: 'Sales',
@@ -50,7 +50,7 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: '5',
-    name: 'Jim Halpert',
+    name: 'Hiteshbhai Chaudhary',
     email: 'employee@banasdairy.coop',
     role: 'Employee',
     department: 'Sales',
@@ -59,8 +59,8 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: '6',
-    name: 'Oscar Martinez',
-    email: 'oscar@banasdairy.coop',
+    name: 'Valabhai Chaudhary',
+    email: 'valabhai@banasdairy.coop',
     role: 'Employee',
     department: 'Finance',
     designation: 'Senior Accountant',
@@ -68,8 +68,8 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: '7',
-    name: 'Toby Flenderson',
-    email: 'toby@banasdairy.coop',
+    name: 'Karshanbhai Chaudhary',
+    email: 'karshanbhai@banasdairy.coop',
     role: 'Employee',
     department: 'Legal',
     designation: 'Legal Advisor',
@@ -77,8 +77,8 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: '8',
-    name: 'Kelly Kapoor',
-    email: 'kelly@banasdairy.coop',
+    name: 'Amratbhai Chaudhary',
+    email: 'amratbhai@banasdairy.coop',
     role: 'Employee',
     department: 'Customer Support',
     designation: 'Support Lead',
@@ -86,8 +86,8 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: '9',
-    name: 'Darryl Philbin',
-    email: 'darryl@banasdairy.coop',
+    name: 'Mavjibhai Chaudhary',
+    email: 'mavjibhai@banasdairy.coop',
     role: 'Manager',
     department: 'Operations',
     designation: 'Plant Manager',
